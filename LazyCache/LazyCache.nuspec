@@ -8,10 +8,10 @@
     <owners>https://github.com/alastairtree</owners>
     <licenseUrl>https://github.com/alastairtree/LazyCache/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/alastairtree/LazyCache</projectUrl>
-    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <iconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>See https://github.com/alastairtree/LazyCache/raw/master/releasenotes.md</releaseNotes>
+    <releaseNotes>See https://raw.githubusercontent.com/alastairtree/LazyCache/master/ReleaseNotes.md</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>Caching Performance Speed In-memory ObjectCache Generics ServiceCacheing Lazy Cache Lazy-Load MemoryCache CachingService AppCache ApplicationCache Memcached</tags>
   </metadata>
