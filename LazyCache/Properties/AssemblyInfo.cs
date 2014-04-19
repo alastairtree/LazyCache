@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("LazyCache")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription(@"Lazy cache is a simple in-memory caching service for .net and c sharp. It has a developer friendly generics based API, and providing a thread safe cache implementation that guarantees to only execute your cachable delegates once (it's lazy!). Under the hood it leverages ObjectCache and Lazy to provide performance and reliability in heavy load scenarios. For more info see https://github.com/alastairtree/LazyCache")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("LazyCache")]
 [assembly: AssemblyTrademark("")]
@@ -33,5 +33,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.5.*")]
+[assembly: AssemblyFileVersion("0.5.*")]
