@@ -42,5 +42,5 @@ Suits the caching of database calls, complex object graph building routines and 
 
 ## API Documentation
 
-See [the wiki](/alastairtree/LazyCache/wiki/LazyCache-API-documentation)
+See [the wiki](https://github.com/alastairtree/LazyCache/wiki/LazyCache-API-documentation)
 
