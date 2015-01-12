@@ -40,6 +40,7 @@ Suits the caching of database calls, complex object graph building routines and 
 - The main class `CachingSevice` is a single class and so could be simply embedded
 - Good test coverage
 
-## To do ##
-- Sample app / extended documentation
+## API Documentation
+
+See [the wiki](/alastairtree/LazyCache/wiki/LazyCache-API-documentation)
 
