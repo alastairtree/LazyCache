@@ -100,6 +100,24 @@ namespace LazyCache
 
             var newLazyCacheItem = new Lazy<T>(addItemFactory);
 
+            if (policy != null && policy.RemovedCallback != null)
+            {
+                policy.RemovedCallback = (args) =>
+                {
+                    //unwrap the cache item in a removed callback given one is specified
+                    if (args != null && args.CacheItem != null)
+                    {
+                        var item = args.CacheItem.Value;
+                        if (item is Lazy<T>)
+                        {
+                            var lazyCacheItem = (Lazy<T>) item;
+                            args.CacheItem.Value = lazyCacheItem.IsValueCreated ? item : null;
+                        }
+                    }
+                    policy.RemovedCallback(args);
+                };
+            }
+
             var existingCacheItem = cache.AddOrGetExisting(key, newLazyCacheItem, policy);
 
             if (existingCacheItem != null)
