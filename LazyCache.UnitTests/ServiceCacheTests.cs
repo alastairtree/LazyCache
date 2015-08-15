@@ -445,5 +445,40 @@ namespace LazyCache.UnitTests
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
         }
+
+        [Test, Timeout(20000)]
+        public void GetOrAddWithPolicyWithCallbackOnRemovedReturnsTheOriginalCachedObject()
+        {
+            var sut = new CachingService();
+            Func<int> fetch = () => 123;
+            CacheEntryRemovedArguments removedCallbackArgs = null;
+            CacheEntryRemovedCallback callback = (args) => removedCallbackArgs = args;
+            
+            
+            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100), RemovedCallback = callback});
+            var actual = sut.Get<int>(TestKey);
+            
+            sut.Remove(TestKey); //force removed callback to fire
+            while(removedCallbackArgs == null)
+                Thread.Sleep(500);
+            
+            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value); 
+        }
+
+        [Test, Timeout(20000)]
+        public void GetOrAddWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        {
+            var sut = new CachingService();
+            Func<int> fetch = () => 123;
+            CacheEntryRemovedArguments removedCallbackArgs = null;
+            CacheEntryRemovedCallback callback = (args) => removedCallbackArgs = args;
+            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100), RemovedCallback = callback });
+
+            sut.Remove(TestKey); //force removed callback to fire
+            while (removedCallbackArgs == null)
+                Thread.Sleep(500);
+
+            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
+        }
     }
 }
