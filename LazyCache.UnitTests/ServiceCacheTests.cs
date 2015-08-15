@@ -453,13 +453,14 @@ namespace LazyCache.UnitTests
             Func<int> fetch = () => 123;
             CacheEntryRemovedArguments removedCallbackArgs = null;
             CacheEntryRemovedCallback callback = (args) => removedCallbackArgs = args;
+            
+            
             sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100), RemovedCallback = callback});
             var actual = sut.Get<int>(TestKey);
             
             sut.Remove(TestKey); //force removed callback to fire
             while(removedCallbackArgs == null)
-                Thread.Sleep(100);
-            
+                Thread.Sleep(500);
             
             Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value); 
         }
@@ -475,7 +476,7 @@ namespace LazyCache.UnitTests
 
             sut.Remove(TestKey); //force removed callback to fire
             while (removedCallbackArgs == null)
-                Thread.Sleep(100);
+                Thread.Sleep(500);
 
             Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
         }
