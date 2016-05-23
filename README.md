@@ -10,22 +10,25 @@ reliability in heavy load scenarios.
 
 LazyCache is available using [nuget](https://www.nuget.org/packages/LazyCache/). To install LazyCache, run the following command in the [Package Manager Console](http://docs.nuget.org/docs/start-here/using-the-package-manager-console)
 
-
-    PM> Install-Package LazyCache
+```Powershell
+PM> Install-Package LazyCache
+```
 
 ## Sample code ##
 
-    // Create our cache service using the defaults (Dependency injection ready).
-    // Uses MemoryCache.Default under the hood so cache is shared out of the box
-    IAppCache cache = new CachingService();
+```csharp
+// Create our cache service using the defaults (Dependency injection ready).
+// Uses MemoryCache.Default under the hood so cache is shared out of the box
+IAppCache cache = new CachingService();
 
-    // Declare (but don't execute) a func/delegate whose result we want to cache
-    Func<ComplexObjects> complexObjectFactory = () => methodThatTakesTimeOrResources();
-    
-    // Get our ComplexObjects from the cache, or build them in the factory func 
-    // and cache the results for next time under the given key
-    ComplexObject cachedResults = cache.GetOrAdd("uniqueKey", complexObjectFactory);
-    
+// Declare (but don't execute) a func/delegate whose result we want to cache
+Func<ComplexObjects> complexObjectFactory = () => methodThatTakesTimeOrResources();
+
+// Get our ComplexObjects from the cache, or build them in the factory func 
+// and cache the results for next time under the given key
+ComplexObject cachedResults = cache.GetOrAdd("uniqueKey", complexObjectFactory);
+```
+
 As you can see the magic happens in the `GetOrAdd()` method which gives the consumer an atomic and tidy way to add caching to your code. It leverages a factory delegate `Func` and generics to make it easy to add cached method calls to your app. 
 
 It means you avoid the usual "Check the cache - execute the factory function - add results to the cache" pattern, saves you writing the double locking cache pattern and means you can be a lazy developer!
