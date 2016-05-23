@@ -20,7 +20,7 @@ LazyCache is available using [nuget](https://www.nuget.org/packages/LazyCache/).
     IAppCache cache = new CachingService();
 
     // Declare (but don't execute) a func/delegate whose result we want to cache
-    Func<ComplexObects> complexObjectFactory = () => methodThatTakesTimeOrResources();
+    Func<ComplexObjects> complexObjectFactory = () => methodThatTakesTimeOrResources();
     
     // Get our ComplexObjects from the cache, or build them in the factory func 
     // and cache the results for next time under the given key
