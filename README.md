@@ -48,7 +48,8 @@ Suits the caching of database calls, complex object graph building routines and 
 - The main class `CachingSevice` is a single class and so could be easily embedded in your application or library
 - Good test coverage
 
-## API Documentation
+## Documentation
 
-See [the wiki](https://github.com/alastairtree/LazyCache/wiki/LazyCache-API-documentation)
+* [the wiki](https://github.com/alastairtree/LazyCache/wiki/LazyCache-API-documentation)
+* [Adding caching to a .net application and make it faster](https://alastaircrabtree.com/the-easy-way-to-add-caching-to-net-application-and-make-it-faster-is-called-lazycache/)
 
