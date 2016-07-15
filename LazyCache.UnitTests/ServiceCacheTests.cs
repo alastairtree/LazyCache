@@ -37,6 +37,136 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void AddObjectRaisesItemAddedEvent()
+        {
+            var addedEventFired = false;
+
+            var sut = new CachingService();
+            sut.ItemAddedEvent += (sender, args) => {
+                addedEventFired = true;
+                Assert.AreEqual(TestKey, args.Key);
+                Assert.AreEqual(CacheChangedEventArgs.ChangeType.Added, args.Change);
+            };
+
+            sut.Add(TestKey, new ComplexTestObject());
+            Assert.IsTrue(addedEventFired);
+        }
+
+        [Test]
+        [Ignore("Not a simple way to handle updates at the moment with introducing more locking.")]
+        public void AddObjectAlreadyCachedDoesNotRaiseItemAddedEvent()
+        {
+            var sut = new CachingService();
+            sut.Add(TestKey, new ComplexTestObject());
+
+            sut.ItemAddedEvent += (sender, args) => {
+                Assert.Fail("Mistakes were made.");
+            };
+
+            // really this will "update" the item already cached by this key
+            sut.Add(TestKey, new ComplexTestObject());
+        }
+
+        [Test]
+        public void GetOrAddObjectRaisesItemAddedEvent()
+        {
+            var addedEventFired = false;
+
+            var sut = new CachingService();
+            sut.ItemAddedEvent += (sender, args) => {
+                addedEventFired = true;
+                Assert.AreEqual(TestKey, args.Key);
+                Assert.AreEqual(CacheChangedEventArgs.ChangeType.Added, args.Change);
+            };
+
+            sut.GetOrAdd(TestKey, () => new ComplexTestObject());
+            Assert.IsTrue(addedEventFired);
+        }
+
+        [Test]
+        public void GetOrAddObjectAlreadyCachedDoesNotRaiseItemAddedEvent()
+        {
+            var sut = new CachingService();
+            sut.GetOrAdd(TestKey, () => new ComplexTestObject());
+
+            sut.ItemAddedEvent += (sender, args) => {
+                Assert.Fail("Mistakes were made.");
+            };
+
+            sut.GetOrAdd(TestKey, () => new ComplexTestObject());
+        }
+
+        [Test]
+        public void GetOrAddObjectAlreadyCachedRaisesItemRetrievedEvent()
+        {
+            var eventFired = false;
+            var sut = new CachingService();
+
+            sut.ItemRetrievedEvent += (sender, args) => {
+                eventFired = true;
+                Assert.AreEqual(TestKey, args.Key);
+                Assert.AreEqual(CacheChangedEventArgs.ChangeType.Retrieved, args.Change);
+            };
+
+            sut.GetOrAdd(TestKey, () => new ComplexTestObject());
+            Assert.IsFalse(eventFired);
+
+            sut.GetOrAdd(TestKey, () => new ComplexTestObject());
+            Assert.IsTrue(eventFired);
+        }
+
+        [Test]
+        public void GetObjectAlreadyCachedRaisesItemRetrievedEvent()
+        {
+            var eventFired = false;
+            var sut = new CachingService();
+
+            sut.ItemRetrievedEvent += (sender, args) => {
+                eventFired = true;
+                Assert.AreEqual(TestKey, args.Key);
+                Assert.AreEqual(CacheChangedEventArgs.ChangeType.Retrieved, args.Change);
+            };
+
+            sut.Add(TestKey, new ComplexTestObject());
+
+            sut.Get<ComplexTestObject>(TestKey);
+            Assert.IsTrue(eventFired);
+        }
+
+        [Test]
+        public void RemoveItemRaisesItemRemovedEvent()
+        {
+            var eventFired = false;
+
+            var sut = new CachingService();
+            sut.ItemRemovedEvent += (sender, args) => {
+                eventFired = true;
+                Assert.AreEqual(TestKey, args.Key);
+                Assert.AreEqual(CacheChangedEventArgs.ChangeType.Removed, args.Change);
+            };
+
+            sut.Add(TestKey, new ComplexTestObject());
+            sut.Remove(TestKey);
+            Assert.IsTrue(eventFired);
+        }
+
+        [Test]
+        public void AddComplexObjectTwiceThenGetReturnsUpdatedObject()
+        {
+            var sut = new CachingService();
+            sut.Add(TestKey, new ComplexTestObject());
+
+            var o = new ComplexTestObject();
+            o.SomeItems[2] = "updated";
+            sut.Add(TestKey, o);
+
+            var actual = sut.Get<ComplexTestObject>(TestKey);
+            
+            Assert.AreEqual(o.SomeItems[2], actual.SomeItems[2]);
+            Assert.AreEqual("updated", actual.SomeItems[2]);
+        }
+
+        [Test]
         public void AddComplexObjectThenGetReturnsCachedObject()
         {
             var sut = new CachingService();
@@ -56,10 +186,18 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public void AddEmptyKeyThrowsExceptionWithExpiration()
+        public void AddEmptyKeyThrowsExceptionWithOffsetExpiration()
         {
             var sut = new CachingService();
             Action act = () => sut.Add("", new object(), DateTimeOffset.Now.AddHours(1));
+            act.ShouldThrow<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void AddEmptyKeyThrowsExceptionWithSlidingExpiration()
+        {
+            var sut = new CachingService();
+            Action act = () => sut.Add("", new object(), TimeSpan.FromHours(1));
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
@@ -80,6 +218,13 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void ConstructWithNullCacheThrowsException()
+        {
+            Action act = () => new CachingService(null);
+            act.ShouldThrow<ArgumentNullException>();
+        }
+
+        [Test]
         public void AddNullKeyThrowsException()
         {
             var sut = new CachingService();
@@ -88,10 +233,18 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public void AddNullKeyThrowsExceptionWithExpiration()
+        public void AddNullKeyThrowsExceptionWithOffsetExpiration()
         {
             var sut = new CachingService();
             Action act = () => sut.Add(null, new object(), DateTimeOffset.Now.AddHours(1));
+            act.ShouldThrow<ArgumentNullException>();
+        }
+
+        [Test]
+        public void AddNullKeyThrowsExceptionWithSlidingExpiration()
+        {
+            var sut = new CachingService();
+            Action act = () => sut.Add(null, new object(), TimeSpan.FromHours(1));
             act.ShouldThrow<ArgumentNullException>();
         }
 
@@ -134,7 +287,7 @@ namespace LazyCache.UnitTests
             sut.Add(TestKey, "testObject", DateTimeOffset.Now.AddSeconds(1));
             Assert.AreEqual("testObject", sut.Get<string>(TestKey));
         }
-
+        
         [Test]
         public void AddWithOffsetThatExpiresReturnsNull()
         {
@@ -184,6 +337,14 @@ namespace LazyCache.UnitTests
             var sut = new CachingService();
             Action act = () => sut.Get<object>("");
             act.ShouldThrow<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void GetOrAddNullFuncThrowsException()
+        {
+            var sut = new CachingService();
+            Action act = () => sut.GetOrAdd<object>(TestKey, null);
+            act.ShouldThrow<ArgumentNullException>();
         }
 
         [Test]

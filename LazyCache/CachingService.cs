@@ -3,8 +3,60 @@ using System.Runtime.Caching;
 
 namespace LazyCache
 {
+    using System.Diagnostics;
+
+    public class CacheChangedEventArgs : EventArgs
+    {
+        public string Key { get; private set; }
+        public ChangeType Change { get; private set; }
+
+        public enum ChangeType
+        {
+            Added,
+            Removed,
+            Retrieved
+        }
+
+        public CacheChangedEventArgs(string key, ChangeType changeType)
+        {
+            Key = key;
+            Change = changeType;
+        }
+    }
+
     public class CachingService : IAppCache
     {
+        public event EventHandler<CacheChangedEventArgs> ItemAddedEvent;
+        public event EventHandler<CacheChangedEventArgs> ItemRemovedEvent;
+        public event EventHandler<CacheChangedEventArgs> ItemRetrievedEvent;
+
+        private void RaiseItemAddedEvent(string key)
+        {
+            var handler = ItemAddedEvent;
+            if (handler != null)
+            {
+                handler(this, new CacheChangedEventArgs(key, CacheChangedEventArgs.ChangeType.Added));
+            }
+        }
+
+        private void RaiseItemRemovedEvent(string key)
+        {
+            var handler = ItemRemovedEvent;
+            if (handler != null)
+            {
+                handler(this, new CacheChangedEventArgs(key, CacheChangedEventArgs.ChangeType.Removed));
+            }
+        }
+
+        private void RaiseItemRetrievedEvent(string key)
+        {
+            var handler = ItemRetrievedEvent;
+            if (handler != null)
+            {
+                handler(this, new CacheChangedEventArgs(key, CacheChangedEventArgs.ChangeType.Retrieved));
+            }
+        }
+
         private readonly ObjectCache cache;
 
         public CachingService() : this(MemoryCache.Default)
@@ -57,22 +109,36 @@ namespace LazyCache
             }
             ValidateKey(key);
 
+            AttachRemovedCallbackHandler(policy);
+
             cache.Set(key, item, policy);
+
+            RaiseItemAddedEvent(key);
+        }
+
+        private void AttachRemovedCallbackHandler(CacheItemPolicy policy)
+        {
+            if (policy != null)
+            {
+                policy.RemovedCallback += args => this.RaiseItemRemovedEvent(args.CacheItem.Key);
+            }
         }
 
         public T Get<T>(string key)
         {
             ValidateKey(key);
-
+             
             var item = cache[key];
 
             if (item is T)
             {
+                RaiseItemRetrievedEvent(key);
                 return (T) item;
             }
 
             if (item is Lazy<T>)
             {
+                RaiseItemRetrievedEvent(key);
                 return ((Lazy<T>) item).Value;
             }
 
@@ -101,6 +167,7 @@ namespace LazyCache
             var newLazyCacheItem = new Lazy<T>(addItemFactory);
 
             EnsureRemovedCallbackDoesNotReturnTheLazy<T>(policy);
+            AttachRemovedCallbackHandler(policy);
 
             var existingCacheItem = cache.AddOrGetExisting(key, newLazyCacheItem, policy);
 
@@ -108,12 +175,16 @@ namespace LazyCache
             {
                 if (existingCacheItem is T)
                 {
-                    return (T) existingCacheItem;
+                    var eci = (T) existingCacheItem;
+                    RaiseItemRetrievedEvent(key);
+                    return eci;
                 }
 
                 if (existingCacheItem is Lazy<T>)
                 {
-                    return ((Lazy<T>) existingCacheItem).Value;
+                    var eci = ((Lazy<T>) existingCacheItem).Value;
+                    RaiseItemRetrievedEvent(key);
+                    return eci;
                 }
 
                 return default(T);
@@ -121,7 +192,11 @@ namespace LazyCache
 
             try
             {
-                return newLazyCacheItem.Value;
+                var val = newLazyCacheItem.Value;
+
+                RaiseItemAddedEvent(key);
+
+                return val;
             }
             catch //addItemFactory errored so do not cache the exception
             {
@@ -157,6 +232,8 @@ namespace LazyCache
         {
             ValidateKey(key);
             cache.Remove(key);
+
+            RaiseItemRemovedEvent(key);
         }
 
         private void ValidateKey(string key)
