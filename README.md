@@ -4,7 +4,7 @@ Lazy cache is a simple in-memory caching service. It has a developer friendly
 generics based API, and provides a thread safe cache implementation that 
 guarantees to only execute your cachable delegates once (it's lazy!). Under 
 the hood it leverages ObjectCache and Lazy<T> to provide performance and 
-reliability in heavy load scenarios.
+reliability in heavy load scenarios. 
 
 ## Download ##
 
