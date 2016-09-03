@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncLazy.cs" />
     <Compile Include="CachingService.cs" />
     <Compile Include="IAppCache.cs" />
     <Compile Include="Mocks\MockCachingService.cs" />

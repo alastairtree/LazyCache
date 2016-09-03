@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 
 namespace LazyCache
 {
@@ -19,5 +20,6 @@ namespace LazyCache
         T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy);
 
         void Remove(string key);
+        Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy);
     }
 }

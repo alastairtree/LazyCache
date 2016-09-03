@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 
 namespace LazyCache.Mocks
 {
@@ -36,6 +37,10 @@ namespace LazyCache.Mocks
         {
         }
 
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy)
+        {
+            return addItemFactory.Invoke();
+        }
 
         public ObjectCache ObjectCache => null;
 
@@ -56,10 +61,6 @@ namespace LazyCache.Mocks
         public T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy)
         {
             return addItemFactory.Invoke();
-        }
-
-        public void Add<T>(string key, DateTime expires, T item)
-        {
         }
     }
 }
