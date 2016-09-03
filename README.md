@@ -1,5 +1,8 @@
 # Lazy Cache #
 
+[![Build status](https://ci.appveyor.com/api/projects/status/oca98pp4safs4vj2/branch/master?svg=true)](https://ci.appveyor.com/project/alastairtree/lazycache/branch/master)
+[![NuGet](https://img.shields.io/nuget/v/LazyCache.svg?maxAge=2592000)](https://www.nuget.org/packages/LazyCache/)
+
 Lazy cache is a simple in-memory caching service. It has a developer friendly 
 generics based API, and provides a thread safe cache implementation that 
 guarantees to only execute your cachable delegates once (it's lazy!). Under 
