@@ -130,6 +130,9 @@ namespace LazyCache
             }
         }
 
+
+        public ObjectCache ObjectCache => cache;
+
         private static void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(CacheItemPolicy policy)
         {
             if (policy != null && policy.RemovedCallback != null)

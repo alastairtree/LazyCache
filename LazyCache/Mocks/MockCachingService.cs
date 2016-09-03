@@ -3,6 +3,10 @@ using System.Runtime.Caching;
 
 namespace LazyCache.Mocks
 {
+    /// <summary>
+    /// A mock implementation IAppCache that does not do any caching. 
+    /// Useful in unit tests or for feature switching to swap in a dependency to disable all caching
+    /// </summary>
     public class MockCachingService : IAppCache
     {
         public void Add<T>(string key, T item)
@@ -31,6 +35,9 @@ namespace LazyCache.Mocks
         public void Remove(string key)
         {
         }
+
+
+        public ObjectCache ObjectCache => null;
 
 
         public void Add<T>(string key, T item, TimeSpan slidingExpiration)
