@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache", "LazyCache\LazyCache.csproj", "{E6A1EF20-94AD-4A1C-9A89-3B2FA8AD8EC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache.UnitTests", "LazyCache.UnitTests\LazyCache.UnitTests.csproj", "{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}"
