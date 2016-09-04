@@ -46,6 +46,7 @@ Suits the caching of database calls, complex object graph building routines and 
 - Guaranteed single evaluation of you factory delegate whose results you want to cache
 - Strongly typed generics based API. No need to cast your cached objects every time you retieve them
 - Thread safe, concurrency ready
+- Async compatible - lazy single evaluation of async delegates using `GetOrAddAsync()`
 - Interface based API and built in `MockCache` to support test driven development and dependency injection
 - Leverages ObjectCache under the hood and can be extended with your own implementation of ObjectCache
 - The main class `CachingSevice` is a single class and so could be easily embedded in your application or library

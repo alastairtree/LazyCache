@@ -20,6 +20,11 @@ namespace LazyCache
         T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy);
 
         void Remove(string key);
+
+        Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory);
         Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy);
+        Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires);
+        Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration);
+        Task<T> GetAsync<T>(string key);
     }
 }

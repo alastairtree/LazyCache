@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 namespace LazyCache.Mocks
 {
     /// <summary>
-    /// A mock implementation IAppCache that does not do any caching. 
-    /// Useful in unit tests or for feature switching to swap in a dependency to disable all caching
+    ///     A mock implementation IAppCache that does not do any caching.
+    ///     Useful in unit tests or for feature switching to swap in a dependency to disable all caching
     /// </summary>
     public class MockCachingService : IAppCache
     {
@@ -40,6 +40,26 @@ namespace LazyCache.Mocks
         public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy)
         {
             return addItemFactory.Invoke();
+        }
+
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
+        {
+            return addItemFactory.Invoke();
+        }
+
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
+        {
+            return addItemFactory.Invoke();
+        }
+
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
+        {
+            return addItemFactory.Invoke();
+        }
+
+        public Task<T> GetAsync<T>(string key)
+        {
+            return Task.FromResult(default(T));
         }
 
         public ObjectCache ObjectCache => null;

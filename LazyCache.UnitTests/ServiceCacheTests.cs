@@ -21,6 +21,7 @@ namespace LazyCache.UnitTests
         public void BeforeEachTest()
         {
             sut = new CachingService();
+            testObject = new ComplexTestObject();
         }
 
         private CachingService sut;
@@ -30,6 +31,8 @@ namespace LazyCache.UnitTests
             AbsoluteExpiration = DateTimeOffset.Now.AddHours(1),
             Priority = CacheItemPriority.NotRemovable
         };
+
+        private ComplexTestObject testObject = new ComplexTestObject();
 
         private class ComplexTestObject
         {
@@ -43,9 +46,9 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddComplexObjectThenGetGenericReturnsCachedObject()
         {
-            sut.Add(TestKey, new ComplexTestObject());
+            sut.Add(TestKey, testObject);
             var actual = sut.Get<ComplexTestObject>(TestKey);
-            var expected = new ComplexTestObject();
+            var expected = testObject;
             Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
             Assert.AreEqual(expected.SomeItems, actual.SomeItems);
         }
@@ -53,9 +56,9 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddComplexObjectThenGetReturnsCachedObject()
         {
-            sut.Add(TestKey, new ComplexTestObject());
+            sut.Add(TestKey, testObject);
             var actual = sut.Get<ComplexTestObject>(TestKey);
-            var expected = new ComplexTestObject();
+            var expected = testObject;
             Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
             Assert.AreEqual(expected.SomeItems, actual.SomeItems);
         }
@@ -220,10 +223,29 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddAndThenGetObjectReturnsCorrectType()
         {
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
+            Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch);
             var actual = sut.Get<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncAndThenGetAsyncObjectReturnsCorrectType()
+        {
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
+            sut.GetOrAddAsync(TestKey, fetch);
+            var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
+            Assert.IsNotNull(actual);
+            Assert.That(actual, Is.EqualTo(testObject));
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncAndThenGetAsyncWrongObjectReturnsNull()
+        {
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
+            sut.GetOrAddAsync(TestKey, fetch);
+            var actual = await sut.GetAsync<ApplicationException>(TestKey);
+            Assert.IsNull(actual);
         }
 
         [Test]
@@ -238,7 +260,7 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddAndThenGetWrongtypeObjectReturnsNull()
         {
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
+            Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch);
             var actual = sut.Get<ApplicationException>(TestKey);
             Assert.IsNull(actual);
@@ -247,7 +269,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAsyncTaskAndThenGetTaskOfAnotherTypeReturnsNull()
         {
-            var cachedAsyncResult = new ComplexTestObject();
+            var cachedAsyncResult = testObject;
             Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(cachedAsyncResult);
             await sut.GetOrAddAsync(TestKey, fetch);
             var actual = sut.Get<Task<ApplicationException>>(TestKey);
@@ -257,7 +279,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAsyncTaskAndThenGetTaskOfObjectReturnsCorrectType()
         {
-            var cachedAsyncResult = new ComplexTestObject();
+            var cachedAsyncResult = testObject;
             Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(cachedAsyncResult);
             await sut.GetOrAddAsync(TestKey, fetch);
             var actual = sut.Get<Task<ComplexTestObject>>(TestKey);
@@ -360,7 +382,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAsyncWithPolicyAndThenGetTaskObjectReturnsCorrectType()
         {
-            var item = new ComplexTestObject();
+            var item = testObject;
             Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(item);
             await sut.GetOrAddAsync(TestKey, fetch,
                 oneHourNonRemoveableCacheItemPolicy);
@@ -371,7 +393,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAyncAllowsCachingATask()
         {
-            var cachedResult = new ComplexTestObject();
+            var cachedResult = testObject;
             Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(cachedResult);
 
             var actualResult = await sut.GetOrAddAsync(TestKey, fetchAsync, oneHourNonRemoveableCacheItemPolicy);
@@ -471,7 +493,7 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddWithPolicyAndThenGetObjectReturnsCorrectType()
         {
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
+            Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch,
                 oneHourNonRemoveableCacheItemPolicy);
             var actual = sut.Get<ComplexTestObject>(TestKey);
@@ -524,7 +546,7 @@ namespace LazyCache.UnitTests
                     AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
                     RemovedCallback = callback
                 });
-            var actual = sut.Get<int>(TestKey);
+            sut.Get<int>(TestKey);
 
             sut.Remove(TestKey); //force removed callback to fire
             while (removedCallbackArgs == null)
@@ -608,7 +630,7 @@ namespace LazyCache.UnitTests
         [Timeout(1000)]
         public void GetOrAddAsyncWithALongTaskReturnsBeforeTaskCompletes()
         {
-            var cachedResult = new ComplexTestObject();
+            var cachedResult = testObject;
             Func<Task<ComplexTestObject>> fetchAsync = () => Task.Delay(TimeSpan.FromMinutes(1)).ContinueWith(x=> cachedResult);
 
             var actualResult = sut.GetOrAddAsync(TestKey, fetchAsync);
@@ -647,6 +669,9 @@ namespace LazyCache.UnitTests
             var cancelledTask = sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>);
 
             Assert.That(cancelledTask, Is.Not.Null);
+
+            Assert.Throws<AggregateException>(cancelledTask.Wait);
+
             Assert.That(cancelledTask.IsCanceled, Is.True);
         }
     }
