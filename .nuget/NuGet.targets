@@ -7,7 +7,7 @@
         <RestorePackages Condition="  '$(RestorePackages)' == '' ">false</RestorePackages>
 
         <!-- Property that enables building a package from a project -->
-        <BuildPackage Condition=" '$(BuildPackage)' == '' ">true</BuildPackage>
+        <BuildPackage Condition=" '$(BuildPackage)' == '' ">false</BuildPackage>
 
         <!-- Determines if package restore consent is required to restore packages -->
         <RequireRestoreConsent Condition=" '$(RequireRestoreConsent)' != 'false' ">true</RequireRestoreConsent>

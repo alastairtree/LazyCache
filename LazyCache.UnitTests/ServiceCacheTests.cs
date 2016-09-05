@@ -233,7 +233,7 @@ namespace LazyCache.UnitTests
         public async Task GetOrAddAsyncAndThenGetAsyncObjectReturnsCorrectType()
         {
             Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
-            sut.GetOrAddAsync(TestKey, fetch);
+            await sut.GetOrAddAsync(TestKey, fetch);
             var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
             Assert.That(actual, Is.EqualTo(testObject));
@@ -243,7 +243,7 @@ namespace LazyCache.UnitTests
         public async Task GetOrAddAsyncAndThenGetAsyncWrongObjectReturnsNull()
         {
             Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
-            sut.GetOrAddAsync(TestKey, fetch);
+            await sut.GetOrAddAsync(TestKey, fetch);
             var actual = await sut.GetAsync<ApplicationException>(TestKey);
             Assert.IsNull(actual);
         }
