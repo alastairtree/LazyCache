@@ -51,6 +51,7 @@ Suits the caching of database calls, complex object graph building routines and 
 - Leverages ObjectCache under the hood and can be extended with your own implementation of ObjectCache
 - The main class `CachingSevice` is a single class and so could be easily embedded in your application or library
 - Good test coverage
+- net45 upwards. (for .net4 use Lazycache 0.6)
 
 ## Documentation
 
