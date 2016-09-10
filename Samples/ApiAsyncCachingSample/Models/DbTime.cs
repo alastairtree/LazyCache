@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SampleWebApp.Models
+namespace ApiAsyncCachingSample.Models
 {
     public class DbTime
     {

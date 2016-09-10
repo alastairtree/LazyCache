@@ -1,7 +1,7 @@
 ﻿using System.Web.Http;
-using SampleWebApp.Models;
+using ApiAsyncCachingSample.Models;
 
-namespace SampleWebApp.Controllers
+namespace ApiAsyncCachingSample.Controllers
 {
     public class DbQueriesController : ApiController
     {

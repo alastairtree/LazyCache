@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8E39EA
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{335BA426-C839-4996-8476-F3EE4056C40E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApp", "Samples\SampleWebApp\SampleWebApp.csproj", "{89141430-5ADF-4413-8733-FC0847F5C876}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiAsyncCachingSample", "Samples\ApiAsyncCachingSample\ApiAsyncCachingSample.csproj", "{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,15 +38,15 @@ Global
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Release|Any CPU.Build.0 = Release|Any CPU
-		{89141430-5ADF-4413-8733-FC0847F5C876}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89141430-5ADF-4413-8733-FC0847F5C876}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89141430-5ADF-4413-8733-FC0847F5C876}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89141430-5ADF-4413-8733-FC0847F5C876}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{89141430-5ADF-4413-8733-FC0847F5C876} = {335BA426-C839-4996-8476-F3EE4056C40E}
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C} = {335BA426-C839-4996-8476-F3EE4056C40E}
 	EndGlobalSection
 EndGlobal

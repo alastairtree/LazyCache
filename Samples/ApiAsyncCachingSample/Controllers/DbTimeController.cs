@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Web.Http;
+using ApiAsyncCachingSample.Models;
 using LazyCache;
-using SampleWebApp.Models;
 
-namespace SampleWebApp.Controllers
+namespace ApiAsyncCachingSample.Controllers
 {
     public class DbTimeController : ApiController
     {

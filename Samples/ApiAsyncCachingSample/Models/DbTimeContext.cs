@@ -1,7 +1,7 @@
 ﻿using System.Data.Entity;
 using System.Threading.Tasks;
 
-namespace SampleWebApp.Models
+namespace ApiAsyncCachingSample.Models
 {
     public class DbTimeContext : DbContext
     {

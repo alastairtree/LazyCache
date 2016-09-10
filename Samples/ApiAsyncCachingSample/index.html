@@ -103,6 +103,10 @@
 
                 bindEvents: function () {
                     $(".btn-clear-cache").click(app.clearCache);
+
+                    $(document).ajaxError(function (event, request, settings) {
+                        app.log("Error requesting page " + settings.url);
+                    });
                 }
 
             };
