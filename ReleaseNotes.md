@@ -5,6 +5,7 @@
 - *BREAKING CHANGE* Upgrade to .net 4.5
 - Added ObjectCache property to IAppCache to allow access to underlying cache for operations such as cache clearing
 - Support caching asynchronous tasks with GetOrAddAsync methods
+- Add ApiAsyncCachingSample to demonstrate the caching the results of SQL Queries in a WebApi controller
 - Add badges to Readme
 
 ## Version 0.6
