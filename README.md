@@ -1,5 +1,8 @@
 # Lazy Cache #
 
+[![Build status](https://ci.appveyor.com/api/projects/status/oca98pp4safs4vj2/branch/master?svg=true)](https://ci.appveyor.com/project/alastairtree/lazycache/branch/master)
+[![NuGet](https://img.shields.io/nuget/v/LazyCache.svg?maxAge=2592000)](https://www.nuget.org/packages/LazyCache/)
+
 Lazy cache is a simple in-memory caching service. It has a developer friendly 
 generics based API, and provides a thread safe cache implementation that 
 guarantees to only execute your cachable delegates once (it's lazy!). Under 
@@ -43,6 +46,7 @@ Suits the caching of database calls, complex object graph building routines and 
 - Guaranteed single evaluation of you factory delegate whose results you want to cache
 - Strongly typed generics based API. No need to cast your cached objects every time you retieve them
 - Thread safe, concurrency ready
+- Async compatible - lazy single evaluation of async delegates using `GetOrAddAsync()`
 - Interface based API and built in `MockCache` to support test driven development and dependency injection
 - Leverages ObjectCache under the hood and can be extended with your own implementation of ObjectCache
 - The main class `CachingSevice` is a single class and so could be easily embedded in your application or library
@@ -53,3 +57,8 @@ Suits the caching of database calls, complex object graph building routines and 
 * [the wiki](https://github.com/alastairtree/LazyCache/wiki)
 * [Adding caching to a .net application and make it faster](https://alastaircrabtree.com/the-easy-way-to-add-caching-to-net-application-and-make-it-faster-is-called-lazycache/)
 
+## Sample Application
+
+See `/Samples/ApiAsyncCachingSample` for an example of how to use LazyCache to cache the results of an Entity framework async query in
+a web api controller. Watch how the cache saves trips to the database and results are returned to the client far quicker from the 
+in-memory cache

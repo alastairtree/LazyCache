@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache", "LazyCache\LazyCache.csproj", "{E6A1EF20-94AD-4A1C-9A89-3B2FA8AD8EC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache.UnitTests", "LazyCache.UnitTests\LazyCache.UnitTests.csproj", "{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}"
@@ -11,12 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "info", "info", "{81C0E096-5
 		ReleaseNotes.md = ReleaseNotes.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8E39EA1B-321E-4D03-BC84-D22DC9B6BB0D}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{335BA426-C839-4996-8476-F3EE4056C40E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiAsyncCachingSample", "Samples\ApiAsyncCachingSample\ApiAsyncCachingSample.csproj", "{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,8 +31,15 @@ Global
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F6C8799-CA9E-43BD-AE97-72C31BB4E106}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FB8EDC6D-CD41-47AA-9758-D8D796F7728C} = {335BA426-C839-4996-8476-F3EE4056C40E}
 	EndGlobalSection
 EndGlobal

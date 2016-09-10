@@ -17,6 +17,23 @@ namespace LazyCache.UnitTests
             MemoryCache.Default.Remove(TestKey);
         }
 
+        [SetUp]
+        public void BeforeEachTest()
+        {
+            sut = new CachingService();
+            testObject = new ComplexTestObject();
+        }
+
+        private CachingService sut;
+
+        private readonly CacheItemPolicy oneHourNonRemoveableCacheItemPolicy = new CacheItemPolicy
+        {
+            AbsoluteExpiration = DateTimeOffset.Now.AddHours(1),
+            Priority = CacheItemPriority.NotRemovable
+        };
+
+        private ComplexTestObject testObject = new ComplexTestObject();
+
         private class ComplexTestObject
         {
             public const string SomeMessage = "testing123";
@@ -25,13 +42,13 @@ namespace LazyCache.UnitTests
 
         private const string TestKey = "testKey";
 
+
         [Test]
         public void AddComplexObjectThenGetGenericReturnsCachedObject()
         {
-            var sut = new CachingService();
-            sut.Add(TestKey, new ComplexTestObject());
+            sut.Add(TestKey, testObject);
             var actual = sut.Get<ComplexTestObject>(TestKey);
-            var expected = new ComplexTestObject();
+            var expected = testObject;
             Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
             Assert.AreEqual(expected.SomeItems, actual.SomeItems);
         }
@@ -39,10 +56,9 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddComplexObjectThenGetReturnsCachedObject()
         {
-            var sut = new CachingService();
-            sut.Add(TestKey, new ComplexTestObject());
+            sut.Add(TestKey, testObject);
             var actual = sut.Get<ComplexTestObject>(TestKey);
-            var expected = new ComplexTestObject();
+            var expected = testObject;
             Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
             Assert.AreEqual(expected.SomeItems, actual.SomeItems);
         }
@@ -50,7 +66,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddEmptyKeyThrowsException()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add("", new object());
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -58,7 +73,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddEmptyKeyThrowsExceptionWithExpiration()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add("", new object(), DateTimeOffset.Now.AddHours(1));
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -66,7 +80,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddEmptyKeyThrowsExceptionWithPolicy()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add("", new object(), new CacheItemPolicy());
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -74,7 +87,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddEmptyKeyThrowsExceptionWithSliding()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add("", new object(), new TimeSpan(1000));
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -82,7 +94,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddNullKeyThrowsException()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add(null, new object());
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -90,7 +101,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddNullKeyThrowsExceptionWithExpiration()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add(null, new object(), DateTimeOffset.Now.AddHours(1));
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -98,7 +108,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddNullKeyThrowsExceptionWithPolicy()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add(null, new object(), new CacheItemPolicy());
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -106,7 +115,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddNullKeyThrowsExceptionWithSliding()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add(null, new object(), new TimeSpan(1000));
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -114,7 +122,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddNullThrowsException()
         {
-            var sut = new CachingService();
             Action act = () => sut.Add<object>(TestKey, null);
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -122,7 +129,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddThenGetReturnsCachedObject()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject");
             Assert.AreEqual("testObject", sut.Get<string>(TestKey));
         }
@@ -130,7 +136,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddWithOffsetReturnsCachedItem()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject", DateTimeOffset.Now.AddSeconds(1));
             Assert.AreEqual("testObject", sut.Get<string>(TestKey));
         }
@@ -138,7 +143,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddWithOffsetThatExpiresReturnsNull()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject", DateTimeOffset.Now.AddSeconds(1));
             Thread.Sleep(1500);
             Assert.IsNull(sut.Get<string>(TestKey));
@@ -147,7 +151,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddWithPolicyReturnsCachedItem()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject", new CacheItemPolicy());
             Assert.AreEqual("testObject", sut.Get<string>(TestKey));
         }
@@ -155,7 +158,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddWithSlidingReturnsCachedItem()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject", new TimeSpan(5000));
             Assert.AreEqual("testObject", sut.Get<string>(TestKey));
         }
@@ -163,7 +165,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void AddWithSlidingThatExpiresReturnsNull()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, "testObject", new TimeSpan(750));
             Thread.Sleep(1500);
             Assert.IsNull(sut.Get<string>(TestKey));
@@ -172,7 +173,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetCachedNullableStructTypeParamReturnsType()
         {
-            var sut = new CachingService();
             DateTime? cached = new DateTime();
             sut.Add(TestKey, cached);
             Assert.AreEqual(cached.Value, sut.Get<DateTime>(TestKey));
@@ -181,7 +181,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetEmptyKeyThrowsException()
         {
-            var sut = new CachingService();
             Action act = () => sut.Get<object>("");
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
@@ -190,7 +189,7 @@ namespace LazyCache.UnitTests
         public void GetFromCacheTwiceAtSameTimeOnlyAddsOnce()
         {
             var times = 0;
-            var sut = new CachingService();
+
             var t1 = Task.Factory.StartNew(() =>
             {
                 sut.GetOrAdd(TestKey, () =>
@@ -217,7 +216,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetNullKeyThrowsException()
         {
-            var sut = new CachingService();
             Action act = () => sut.Get<object>(null);
             act.ShouldThrow<ArgumentNullException>();
         }
@@ -225,17 +223,34 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddAndThenGetObjectReturnsCorrectType()
         {
-            var sut = new CachingService();
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
+            Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch);
             var actual = sut.Get<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
         }
 
         [Test]
+        public async Task GetOrAddAsyncAndThenGetAsyncObjectReturnsCorrectType()
+        {
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
+            await sut.GetOrAddAsync(TestKey, fetch);
+            var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
+            Assert.IsNotNull(actual);
+            Assert.That(actual, Is.EqualTo(testObject));
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncAndThenGetAsyncWrongObjectReturnsNull()
+        {
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(testObject);
+            await sut.GetOrAddAsync(TestKey, fetch);
+            var actual = await sut.GetAsync<ApplicationException>(TestKey);
+            Assert.IsNull(actual);
+        }
+
+        [Test]
         public void GetOrAddAndThenGetValueObjectReturnsCorrectType()
         {
-            var sut = new CachingService();
             Func<int> fetch = () => 123;
             sut.GetOrAdd(TestKey, fetch);
             var actual = sut.Get<int>(TestKey);
@@ -245,18 +260,152 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddAndThenGetWrongtypeObjectReturnsNull()
         {
-            var sut = new CachingService();
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
+            Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch);
-            var actual = sut.Get<Exception>(TestKey);
+            var actual = sut.Get<ApplicationException>(TestKey);
             Assert.IsNull(actual);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncTaskAndThenGetTaskOfAnotherTypeReturnsNull()
+        {
+            var cachedAsyncResult = testObject;
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(cachedAsyncResult);
+            await sut.GetOrAddAsync(TestKey, fetch);
+            var actual = sut.Get<Task<ApplicationException>>(TestKey);
+            Assert.Null(actual);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncTaskAndThenGetTaskOfObjectReturnsCorrectType()
+        {
+            var cachedAsyncResult = testObject;
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(cachedAsyncResult);
+            await sut.GetOrAddAsync(TestKey, fetch);
+            var actual = sut.Get<Task<ComplexTestObject>>(TestKey);
+            Assert.IsNotNull(actual);
+            Assert.That(actual.Result, Is.EqualTo(cachedAsyncResult));
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWillAddOnFirstCall()
+        {
+            var times = 0;
+
+            var expected = await sut.GetOrAddAsync(TestKey, () =>
+            {
+                times++;
+                return Task.FromResult(new DateTime(2001, 01, 01));
+            });
+            Assert.AreEqual(2001, expected.Year);
+            Assert.AreEqual(1, times);
+        }
+
+
+        [Test]
+        public async Task GetOrAddAsyncWillAddOnFirstCallButReturnCachedOnSecond()
+        {
+            var times = 0;
+
+            var expectedFirst = await sut.GetOrAdd(TestKey, () =>
+            {
+                times++;
+                return Task.FromResult(new DateTime(2001, 01, 01));
+            });
+
+            var expectedSecond = await sut.GetOrAdd(TestKey, () =>
+            {
+                times++;
+                return Task.FromResult(new DateTime(2002, 01, 01));
+            });
+
+            Assert.AreEqual(2001, expectedFirst.Year);
+            Assert.AreEqual(2001, expectedSecond.Year);
+            Assert.AreEqual(1, times);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWillNotAddIfExistingData()
+        {
+            var times = 0;
+
+            var cached = new DateTime(1999, 01, 01);
+            sut.Add(TestKey, cached);
+
+            var expected = await sut.GetOrAddAsync(TestKey, () =>
+            {
+                times++;
+                return Task.FromResult(new DateTime(2001, 01, 01));
+            });
+            Assert.AreEqual(1999, expected.Year);
+            Assert.AreEqual(0, times);
+        }
+
+        [Test, Timeout(20000)]
+        public async Task GetOrAddAsyncWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        {
+            Func<Task<int>> fetch = () => Task.FromResult(123);
+            CacheEntryRemovedArguments removedCallbackArgs = null;
+            CacheEntryRemovedCallback callback = args => removedCallbackArgs = args;
+            await sut.GetOrAddAsync(TestKey, fetch,
+                new CacheItemPolicy
+                {
+                    AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
+                    RemovedCallback = callback
+                });
+
+            sut.Remove(TestKey); //force removed callback to fire
+            while (removedCallbackArgs == null)
+                Thread.Sleep(500);
+
+            var callbackResult = removedCallbackArgs.CacheItem.Value;
+            Assert.That(callbackResult, Is.AssignableTo<Task<int>>());
+            var callbackResultValue = await (Task<int>) removedCallbackArgs.CacheItem.Value;
+
+            Assert.AreEqual(123, callbackResultValue);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithOffsetWillAddAndReturnTaskOfCached()
+        {
+            var expectedFirst = await sut.GetOrAddAsync(
+                TestKey,
+                () => Task.FromResult(new DateTime(2001, 01, 01)),
+                DateTimeOffset.Now.AddSeconds(5)
+                );
+            var expectedSecond = await sut.Get<Task<DateTime>>(TestKey);
+
+            Assert.AreEqual(2001, expectedFirst.Year);
+            Assert.AreEqual(2001, expectedSecond.Year);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithPolicyAndThenGetTaskObjectReturnsCorrectType()
+        {
+            var item = testObject;
+            Func<Task<ComplexTestObject>> fetch = () => Task.FromResult(item);
+            await sut.GetOrAddAsync(TestKey, fetch,
+                oneHourNonRemoveableCacheItemPolicy);
+            var actual = await sut.Get<Task<ComplexTestObject>>(TestKey);
+            Assert.That(actual, Is.EqualTo(item));
+        }
+
+        [Test]
+        public async Task GetOrAddAyncAllowsCachingATask()
+        {
+            var cachedResult = testObject;
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(cachedResult);
+
+            var actualResult = await sut.GetOrAddAsync(TestKey, fetchAsync, oneHourNonRemoveableCacheItemPolicy);
+
+            Assert.That(actualResult, Is.EqualTo(cachedResult));
         }
 
         [Test]
         public void GetOrAddWillAddOnFirstCall()
         {
             var times = 0;
-            var sut = new CachingService();
+
 
             var expected = sut.GetOrAdd(TestKey, () =>
             {
@@ -267,11 +416,11 @@ namespace LazyCache.UnitTests
             Assert.AreEqual(1, times);
         }
 
+
         [Test]
         public void GetOrAddWillAddOnFirstCallButReturnCachedOnSecond()
         {
             var times = 0;
-            var sut = new CachingService();
 
             var expectedFirst = sut.GetOrAdd(TestKey, () =>
             {
@@ -294,7 +443,7 @@ namespace LazyCache.UnitTests
         public void GetOrAddWillNotAddIfExistingData()
         {
             var times = 0;
-            var sut = new CachingService();
+
             var cached = new DateTime(1999, 01, 01);
             sut.Add(TestKey, cached);
 
@@ -307,11 +456,29 @@ namespace LazyCache.UnitTests
             Assert.AreEqual(0, times);
         }
 
+        [Test, Timeout(20000)]
+        public void GetOrAddWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        {
+            Func<int> fetch = () => 123;
+            CacheEntryRemovedArguments removedCallbackArgs = null;
+            CacheEntryRemovedCallback callback = args => removedCallbackArgs = args;
+            sut.GetOrAdd(TestKey, fetch,
+                new CacheItemPolicy
+                {
+                    AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
+                    RemovedCallback = callback
+                });
+
+            sut.Remove(TestKey); //force removed callback to fire
+            while (removedCallbackArgs == null)
+                Thread.Sleep(500);
+
+            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
+        }
+
         [Test]
         public void GetOrAddWithOffsetWillAddAndReturnCached()
         {
-            var sut = new CachingService();
-
             var expectedFirst = sut.GetOrAdd(
                 TestKey,
                 () => new DateTime(2001, 01, 01),
@@ -326,9 +493,9 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddWithPolicyAndThenGetObjectReturnsCorrectType()
         {
-            var sut = new CachingService();
-            Func<ComplexTestObject> fetch = () => new ComplexTestObject();
-            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy {AbsoluteExpiration = DateTimeOffset.Now.AddHours(1), Priority = CacheItemPriority.NotRemovable});
+            Func<ComplexTestObject> fetch = () => testObject;
+            sut.GetOrAdd(TestKey, fetch,
+                oneHourNonRemoveableCacheItemPolicy);
             var actual = sut.Get<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
         }
@@ -336,9 +503,8 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddWithPolicyAndThenGetValueObjectReturnsCorrectType()
         {
-            var sut = new CachingService();
             Func<int> fetch = () => 123;
-            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy {AbsoluteExpiration = DateTimeOffset.Now.AddHours(1), Priority = CacheItemPriority.NotRemovable});
+            sut.GetOrAdd(TestKey, fetch, oneHourNonRemoveableCacheItemPolicy);
             var actual = sut.Get<int>(TestKey);
             Assert.AreEqual(123, actual);
         }
@@ -347,45 +513,65 @@ namespace LazyCache.UnitTests
         public void GetOrAddWithPolicyWillAddOnFirstCallButReturnCachedOnSecond()
         {
             var times = 0;
-            var sut = new CachingService();
+
 
             var expectedFirst = sut.GetOrAdd(TestKey, () =>
             {
                 times++;
                 return new DateTime(2001, 01, 01);
-            }, new CacheItemPolicy {AbsoluteExpiration = DateTimeOffset.Now.AddHours(1), Priority = CacheItemPriority.NotRemovable});
+            }, oneHourNonRemoveableCacheItemPolicy);
 
             var expectedSecond = sut.GetOrAdd(TestKey, () =>
             {
                 times++;
                 return new DateTime(2002, 01, 01);
-            }, new CacheItemPolicy {AbsoluteExpiration = DateTimeOffset.Now.AddHours(1), Priority = CacheItemPriority.NotRemovable});
+            }, oneHourNonRemoveableCacheItemPolicy);
 
             Assert.AreEqual(2001, expectedFirst.Year);
             Assert.AreEqual(2001, expectedSecond.Year);
             Assert.AreEqual(1, times);
         }
 
+        [Test, Timeout(20000)]
+        public void GetOrAddWithPolicyWithCallbackOnRemovedReturnsTheOriginalCachedObject()
+        {
+            Func<int> fetch = () => 123;
+            CacheEntryRemovedArguments removedCallbackArgs = null;
+            CacheEntryRemovedCallback callback = args => removedCallbackArgs = args;
+
+
+            sut.GetOrAdd(TestKey, fetch,
+                new CacheItemPolicy
+                {
+                    AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
+                    RemovedCallback = callback
+                });
+            sut.Get<int>(TestKey);
+
+            sut.Remove(TestKey); //force removed callback to fire
+            while (removedCallbackArgs == null)
+                Thread.Sleep(500);
+
+            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
+        }
+
         [Test]
         public void GetWithClassTypeParamReturnsType()
         {
-            var sut = new CachingService();
             var cached = new EventArgs();
             sut.Add(TestKey, cached);
             Assert.AreEqual(cached, sut.Get<EventArgs>(TestKey));
         }
 
         [Test]
-        public void GetWithIntRetunsDefualtIfNotCached()
+        public void GetWithIntRetunsDefaultIfNotCached()
         {
-            var sut = new CachingService();
             Assert.AreEqual(default(int), sut.Get<int>(TestKey));
         }
 
         [Test]
         public void GetWithNullableIntRetunsCachedNonNullableInt()
         {
-            var sut = new CachingService();
             const int expected = 123;
             sut.Add(TestKey, expected);
             Assert.AreEqual(expected, sut.Get<int?>(TestKey));
@@ -394,7 +580,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetWithNullableStructTypeParamReturnsType()
         {
-            var sut = new CachingService();
             var cached = new DateTime();
             sut.Add(TestKey, cached);
             Assert.AreEqual(cached, sut.Get<DateTime?>(TestKey));
@@ -403,7 +588,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetWithStructTypeParamReturnsType()
         {
-            var sut = new CachingService();
             var cached = new DateTime(2000, 1, 1);
             sut.Add(TestKey, cached);
             Assert.AreEqual(cached, sut.Get<DateTime>(TestKey));
@@ -412,7 +596,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetWithValueTypeParamReturnsType()
         {
-            var sut = new CachingService();
             const int cached = 3;
             sut.Add(TestKey, cached);
             Assert.AreEqual(3, sut.Get<int>(TestKey));
@@ -421,7 +604,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetWithWrongClassTypeParamReturnsNull()
         {
-            var sut = new CachingService();
             var cached = new EventArgs();
             sut.Add(TestKey, cached);
             Assert.IsNull(sut.Get<ArgumentNullException>(TestKey));
@@ -430,7 +612,6 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetWithWrongStructTypeParamReturnsNull()
         {
-            var sut = new CachingService();
             var cached = new DateTime();
             sut.Add(TestKey, cached);
             Assert.AreEqual(new TimeSpan(), sut.Get<TimeSpan>(TestKey));
@@ -439,46 +620,59 @@ namespace LazyCache.UnitTests
         [Test]
         public void RemovedItemCannotBeRetrievedFromCache()
         {
-            var sut = new CachingService();
             sut.Add(TestKey, new object());
             Assert.NotNull(sut.Get<object>(TestKey));
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
         }
 
-        [Test, Timeout(20000)]
-        public void GetOrAddWithPolicyWithCallbackOnRemovedReturnsTheOriginalCachedObject()
+        [Test]
+        [Timeout(1000)]
+        public void GetOrAddAsyncWithALongTaskReturnsBeforeTaskCompletes()
         {
-            var sut = new CachingService();
-            Func<int> fetch = () => 123;
-            CacheEntryRemovedArguments removedCallbackArgs = null;
-            CacheEntryRemovedCallback callback = (args) => removedCallbackArgs = args;
-            
-            
-            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100), RemovedCallback = callback});
-            var actual = sut.Get<int>(TestKey);
-            
-            sut.Remove(TestKey); //force removed callback to fire
-            while(removedCallbackArgs == null)
-                Thread.Sleep(500);
-            
-            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value); 
+            var cachedResult = testObject;
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.Delay(TimeSpan.FromMinutes(1)).ContinueWith(x=> cachedResult);
+
+            var actualResult = sut.GetOrAddAsync(TestKey, fetchAsync);
+
+            Assert.That(actualResult, Is.Not.Null);
+            Assert.That(actualResult.IsCompleted, Is.Not.True);
         }
 
-        [Test, Timeout(20000)]
-        public void GetOrAddWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        [Test]
+        public void GetOrAddAsyncAFailingTaskDoesNotCacheIt()
         {
-            var sut = new CachingService();
-            Func<int> fetch = () => 123;
-            CacheEntryRemovedArguments removedCallbackArgs = null;
-            CacheEntryRemovedCallback callback = (args) => removedCallbackArgs = args;
-            sut.GetOrAdd(TestKey, fetch, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100), RemovedCallback = callback });
+            Func<Task<ComplexTestObject>> fetchAsync = () => 
+                Task<ComplexTestObject>.Factory.StartNew(
+                    () => { throw new ApplicationException(); });
 
-            sut.Remove(TestKey); //force removed callback to fire
-            while (removedCallbackArgs == null)
-                Thread.Sleep(500);
+            Assert.ThrowsAsync<ApplicationException>(async () => await sut.GetOrAddAsync(TestKey, fetchAsync));
 
-            Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
+            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
+
+            Assert.That(stillCached, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddAsyncACancelledTaskDoesNotCacheIt()
+        {
+            Assert.ThrowsAsync<TaskCanceledException>(async () => await sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>));
+
+            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
+
+            Assert.That(stillCached, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddAsyncACancelledTaskReturnsTheCacelledTaskToConsumer()
+        {
+            var cancelledTask = sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>);
+
+            Assert.That(cancelledTask, Is.Not.Null);
+
+            Assert.Throws<AggregateException>(cancelledTask.Wait);
+
+            Assert.That(cancelledTask.IsCanceled, Is.True);
         }
     }
 }
