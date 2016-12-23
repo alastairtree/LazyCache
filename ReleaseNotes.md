@@ -1,5 +1,8 @@
 # Release notes for LazyCache #
 
+## Version 0.7.1
+- Fix async/sync interopability bug, see https://github.com/alastairtree/LazyCache/issues/12
+
 ## Version 0.7
 
 - *BREAKING CHANGE* Upgrade to .net 4.5
