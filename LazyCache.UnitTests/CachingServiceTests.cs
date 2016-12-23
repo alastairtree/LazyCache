@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace LazyCache.UnitTests
 {
     [TestFixture]
-    public class ServiceCacheTests
+    public class CachingServiceTests
     {
         [TearDown]
         public void TearDown()
@@ -218,6 +218,43 @@ namespace LazyCache.UnitTests
         {
             Action act = () => sut.Get<object>(null);
             act.ShouldThrow<ArgumentNullException>();
+        }
+
+        [Test]
+        public async Task GetOrAddFollowinGetOrAddAsyncReturnsTheFirstObjectAndUnwrapsTheFirstTask()
+        {
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(testObject);
+            Func<ComplexTestObject> fetchSync = () => new ComplexTestObject();
+
+            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
+            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
+
+            Assert.IsNotNull(actualAsync);
+            Assert.That(actualAsync, Is.EqualTo(testObject));
+
+            Assert.IsNotNull(actualSync);
+            Assert.That(actualSync, Is.EqualTo(testObject));
+
+            Assert.AreEqual(actualAsync, actualSync);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncFollowinGetOrAddReturnsTheFirstObjectAndIgnoresTheSecondTask()
+        {
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(new ComplexTestObject());
+            Func<ComplexTestObject> fetchSync = () => testObject;
+
+            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
+            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
+
+
+            Assert.IsNotNull(actualSync);
+            Assert.That(actualSync, Is.EqualTo(testObject));
+
+            Assert.IsNotNull(actualAsync);
+            Assert.That(actualAsync, Is.EqualTo(testObject));
+
+            Assert.AreEqual(actualAsync, actualSync);
         }
 
         [Test]
