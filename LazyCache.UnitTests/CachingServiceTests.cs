@@ -49,18 +49,18 @@ namespace LazyCache.UnitTests
             sut.Add(TestKey, testObject);
             var actual = sut.Get<ComplexTestObject>(TestKey);
             var expected = testObject;
-            Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
-            Assert.AreEqual(expected.SomeItems, actual.SomeItems);
+            Assert.NotNull(actual);
+            Assert.AreEqual(expected, actual);
         }
 
         [Test]
         public void AddComplexObjectThenGetReturnsCachedObject()
         {
             sut.Add(TestKey, testObject);
-            var actual = sut.Get<ComplexTestObject>(TestKey);
+            var actual = sut.Get<object>(TestKey) as ComplexTestObject;
             var expected = testObject;
-            Assert.AreEqual(ComplexTestObject.SomeMessage, ComplexTestObject.SomeMessage);
-            Assert.AreEqual(expected.SomeItems, actual.SomeItems);
+            Assert.NotNull(actual);
+            Assert.AreEqual(expected, actual);
         }
 
         [Test]
