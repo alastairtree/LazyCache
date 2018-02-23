@@ -1,5 +1,11 @@
 # Release notes for LazyCache #
 
+## Version 2.0.0
+- *BREAKING CHANGE* Upgrade to netstandard2.0
+- *BREAKING CHANGE* Change underlying cache from System.Runtime.Caching to Microsft.Extension.Caching.Memory
+- *BREAKING CHANGE* Removed IAppCache.ObjectCache (change to IAppCache.MemoryCache)
+- *BREAKING CHANGE* changed from CacheItemPolicy to MemoryCacheEntryOptions. Now uses PostEvictionCallbacks.
+
 ## Version 0.7.1
 - Fix async/sync interopability bug, see https://github.com/alastairtree/LazyCache/issues/12
 

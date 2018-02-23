@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache
 {
     public class CachingService : IAppCache
     {
-        public CachingService() : this(MemoryCache.Default)
+        public CachingService() : this(new MemoryCache(new MemoryCacheOptions()))
         {
         }
 
-        public CachingService(ObjectCache cache)
+        public CachingService(IMemoryCache cache)
         {
-            if (cache == null)
-                throw new ArgumentNullException(nameof(cache));
-
-            ObjectCache = cache;
+            MemoryCache = cache ?? throw new ArgumentNullException(nameof(cache));
             DefaultCacheDuration = 60*20;
         }
 
@@ -33,28 +30,28 @@ namespace LazyCache
 
         public void Add<T>(string key, T item, DateTimeOffset expires)
         {
-            Add(key, item, new CacheItemPolicy {AbsoluteExpiration = expires});
+            Add(key, item, new MemoryCacheEntryOptions { AbsoluteExpiration = expires});
         }
 
         public void Add<T>(string key, T item, TimeSpan slidingExpiration)
         {
-            Add(key, item, new CacheItemPolicy {SlidingExpiration = slidingExpiration});
+            Add(key, item, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        public void Add<T>(string key, T item, CacheItemPolicy policy)
+        public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             ValidateKey(key);
 
-            ObjectCache.Set(key, item, policy);
+            MemoryCache.Set(key, item, policy);
         }
 
         public T Get<T>(string key)
         {
             ValidateKey(key);
 
-            var item = ObjectCache[key];
+            var item = MemoryCache.Get(key);
 
             return UnwrapLazy<T>(item);
         }
@@ -64,7 +61,7 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            var item = ObjectCache[key];
+            var item = MemoryCache.Get(key);
 
             return await UnwrapAsyncLazys<T>(item);
         }
@@ -76,66 +73,68 @@ namespace LazyCache
         }
 
 
-        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy)
+        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, MemoryCacheEntryOptions policy)
         {
             ValidateKey(key);
 
-            var newLazyCacheItem = new AsyncLazy<T>(addItemFactory);
-
             EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(policy);
 
-            var existingCacheItem = ObjectCache.AddOrGetExisting(key, newLazyCacheItem, policy);
-
-            if (existingCacheItem != null)
-                return await UnwrapAsyncLazys<T>(existingCacheItem);
+            var cacheItem = MemoryCache.GetOrCreate(key, entry =>
+                {
+                    entry.SetOptions(policy);
+                    var value = new AsyncLazy<T>(addItemFactory);
+                    return (object) value;
+                }
+            );
 
             try
             {
-                var result = newLazyCacheItem.Value;
+                var result = UnwrapAsyncLazys<T>(cacheItem);
 
                 if (result.IsCanceled || result.IsFaulted)
-                    ObjectCache.Remove(key);
+                    MemoryCache.Remove(key);
 
                 return await result;
             }
             catch //addItemFactory errored so do not cache the exception
             {
-                ObjectCache.Remove(key);
+                MemoryCache.Remove(key);
                 throw;
             }
         }
 
         public T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
         {
-            return GetOrAdd(key, addItemFactory, new CacheItemPolicy {AbsoluteExpiration = expires});
+            return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
 
         public T GetOrAdd<T>(string key, Func<T> addItemFactory, TimeSpan slidingExpiration)
         {
-            return GetOrAdd(key, addItemFactory, new CacheItemPolicy {SlidingExpiration = slidingExpiration});
+            return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy)
+        public T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
         {
             ValidateKey(key);
 
-            var newLazyCacheItem = new Lazy<T>(addItemFactory);
-
             EnsureRemovedCallbackDoesNotReturnTheLazy<T>(policy);
 
-            var existingCacheItem = ObjectCache.AddOrGetExisting(key, newLazyCacheItem, policy);
-
-            if (existingCacheItem != null)
-                return UnwrapLazy<T>(existingCacheItem);
+            var cacheItem = MemoryCache.GetOrCreate(key, entry =>
+                {
+                    entry.SetOptions(policy);
+                    var value = new Lazy<T>(addItemFactory);
+                    return (object)value;
+                }
+            );
 
             try
             {
-                return newLazyCacheItem.Value;
+                return UnwrapLazy<T>(cacheItem);
             }
             catch //addItemFactory errored so do not cache the exception
             {
-                ObjectCache.Remove(key);
+                MemoryCache.Remove(key);
                 throw;
             }
         }
@@ -144,10 +143,10 @@ namespace LazyCache
         public void Remove(string key)
         {
             ValidateKey(key);
-            ObjectCache.Remove(key);
+            MemoryCache.Remove(key);
         }
 
-        public ObjectCache ObjectCache { get; }
+        public IMemoryCache MemoryCache { get; }
 
         public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
         {
@@ -156,12 +155,12 @@ namespace LazyCache
 
         public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
         {
-            return await GetOrAddAsync(key, addItemFactory, new CacheItemPolicy {AbsoluteExpiration = expires});
+            return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
         public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
         {
-            return await GetOrAddAsync(key, addItemFactory, new CacheItemPolicy {SlidingExpiration = slidingExpiration});
+            return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
         private static T UnwrapLazy<T>(object item)
@@ -175,7 +174,7 @@ namespace LazyCache
 
             var asyncLazy = item as AsyncLazy<T>;
             if (asyncLazy != null)
-                return asyncLazy.Value.Result;
+                return asyncLazy.Value.ConfigureAwait(false).GetAwaiter().GetResult();
 
             var task = item as Task<T>;
             if (task != null)
@@ -204,36 +203,40 @@ namespace LazyCache
             return default(T);
         }
 
-        private static void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(CacheItemPolicy policy)
+        private static void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
         {
-            if (policy?.RemovedCallback != null)
+            if (policy?.PostEvictionCallbacks != null)
             {
-                var originallCallback = policy.RemovedCallback;
-                policy.RemovedCallback = args =>
+                foreach (var item in policy.PostEvictionCallbacks)
                 {
-                    //unwrap the cache item in a callback given one is specified
-                    var item = args?.CacheItem?.Value as Lazy<T>;
-                    if (item != null)
-                        args.CacheItem.Value = item.IsValueCreated ? item.Value : default(T);
-                    originallCallback(args);
-                };
+                    var originallCallback = item.EvictionCallback;
+                    item.EvictionCallback = (key, value, reason, state) =>
+                    {
+                        //unwrap the cache item in a callback given one is specified
+                        if (value is Lazy<T> cacheItem)
+                            value = cacheItem.IsValueCreated ? cacheItem.Value : default(T); ;
+                        originallCallback(key, value, reason, state);
+                    };
+                }
             }
         }
 
-        private static void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(CacheItemPolicy policy)
+        private static void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
         {
-            if (policy?.RemovedCallback != null)
-            {
-                var originallCallback = policy.RemovedCallback;
-                policy.RemovedCallback = args =>
+            if (policy?.PostEvictionCallbacks != null)
+                foreach (var item in policy.PostEvictionCallbacks)
                 {
-                    //unwrap the cache item in a callback given one is specified
-                    var item = args?.CacheItem?.Value as AsyncLazy<T>;
-                    if (item != null)
-                        args.CacheItem.Value = item.IsValueCreated ? item.Value : Task.FromResult(default(T));
-                    originallCallback(args);
-                };
-            }
+                    var originalCallback = item.EvictionCallback;
+                    item.EvictionCallback = (key, value, reason, state) =>
+                    {
+                        //unwrap the cache item in a callback given one is specified
+                        if (value is AsyncLazy<T> cacheItem)
+                        {
+                            value = cacheItem.IsValueCreated ? cacheItem.Value : Task.FromResult(default(T));
+                        }
+                        originalCallback(key, value, reason, state);
+                    };
+                }
         }
 
         private void ValidateKey(string key)

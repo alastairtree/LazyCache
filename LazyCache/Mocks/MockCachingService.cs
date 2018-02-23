@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache.Mocks
 {
@@ -37,7 +37,7 @@ namespace LazyCache.Mocks
         {
         }
 
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy)
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, MemoryCacheEntryOptions policy)
         {
             return addItemFactory.Invoke();
         }
@@ -62,14 +62,14 @@ namespace LazyCache.Mocks
             return Task.FromResult(default(T));
         }
 
-        public ObjectCache ObjectCache => null;
+        public IMemoryCache MemoryCache => null;
 
 
         public void Add<T>(string key, T item, TimeSpan slidingExpiration)
         {
         }
 
-        public void Add<T>(string key, T item, CacheItemPolicy policy)
+        public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
         }
 
@@ -78,7 +78,7 @@ namespace LazyCache.Mocks
             return addItemFactory.Invoke();
         }
 
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy)
+        public T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
         {
             return addItemFactory.Invoke();
         }
