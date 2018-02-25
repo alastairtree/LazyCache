@@ -70,7 +70,7 @@
                 },
 
                 updateLogWithTime: function (dbTime, duration) {
-                    var message = "API reports that the time now in the database is " + dbTime.TimeNowInTheDatabase + " (" + duration + "ms)";
+                    var message = "API reports that the time now in the database is " + dbTime.timeNowInTheDatabase + " (" + duration + "ms)";
                     app.log(message);
                 },
 
@@ -80,7 +80,7 @@
                         url: "/api/dbtime"
                     })
                         .done(function (data) {
-                            app.log(data.Message);
+                            app.log(data.message);
                         });
                 },
 

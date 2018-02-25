@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApiAsyncCachingSample.Models
+namespace CacheDatabaseQueriesApiSample
 {
     public class DbTime
     {
@@ -14,7 +14,9 @@ namespace ApiAsyncCachingSample.Models
             
         }
 
-        public DateTime TimeNowInTheDatabase { get; set; }
+        public virtual int id { get; set; }
+
+        public virtual DateTime TimeNowInTheDatabase { get; set; }
 
 
     }

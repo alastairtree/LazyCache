@@ -1,9 +1,9 @@
-﻿using System.Web.Http;
-using ApiAsyncCachingSample.Models;
+﻿using CacheDatabaseQueriesApiSample;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ApiAsyncCachingSample.Controllers
 {
-    public class DbQueriesController : ApiController
+    public class DbQueriesController : Controller
     {
         [HttpGet]
         [Route("api/dbQueries")]

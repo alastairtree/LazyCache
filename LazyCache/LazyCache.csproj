@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0</Version>
+    <Authors>https://github.com/alastairtree</Authors>
+    <Company>https://github.com/alastairtree</Company>
+    <Description>Lazy cache is a simple, thread safe in-memory caching service</Description>
+    <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
+    <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
+    <PackageLicenseUrl>https://github.com/alastairtree/LazyCache/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
+    <PackageTags>Caching Performance Speed In-memory ObjectCache Generics ServiceCacheing Lazy Cache Lazy-Load MemoryCache CachingService AppCache ApplicationCache Memcached</PackageTags>
+    <PackageReleaseNotes>See https://raw.githubusercontent.com/alastairtree/LazyCache/master/ReleaseNotes.md</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
