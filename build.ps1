@@ -28,15 +28,20 @@ function Exec
 
 $config = "release"
 
-Exec { dotnet restore }
+Try {
+	Exec { dotnet restore }
 
-Exec { dotnet build --configuration $config --no-restore }
+	Exec { dotnet build --configuration $config --no-restore }
 
-Get-ChildItem .\**\*.csproj -Recurse |  Where-Object { $_.Name -match ".*Test(s)?.csproj$"} | ForEach-Object { 
-    Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore }
-}
+	Get-ChildItem .\**\*.csproj -Recurse |  Where-Object { $_.Name -match ".*Test(s)?.csproj$"} | ForEach-Object { 
+		Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore }
+	}
 
-if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue)
-{
-    Get-ChildItem .\*\bin\$config\*.nupkg -Recurse | ForEach-Object { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+	if (Get-Command "Push-AppveyorArtifact" -errorAction SilentlyContinue)
+	{
+		Get-ChildItem .\*\bin\$config\*.nupkg -Recurse | ForEach-Object { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+	}
+} Catch {
+	$host.SetShouldExit(-1)
+	throw
 }
