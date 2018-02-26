@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using NUnit.Framework;
 
@@ -11,16 +12,10 @@ namespace LazyCache.UnitTests
     [TestFixture]
     public class CachingServiceTests
     {
-        [TearDown]
-        public void TearDown()
-        {
-            //MemoryCache.Default.Remove(TestKey);
-        }
-
         [SetUp]
         public void BeforeEachTest()
         {
-            sut = new CachingService();
+            sut = new CachingService(new MemoryCacheProvider());
             testObject = new ComplexTestObject();
         }
 

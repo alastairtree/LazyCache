@@ -10,6 +10,8 @@ namespace LazyCache.Mocks
     /// </summary>
     public class MockCachingService : IAppCache
     {
+        public ICacheProvider CacheProvider { get; } = new MockCacheProvider();
+
         public void Add<T>(string key, T item)
         {
         }
@@ -62,8 +64,6 @@ namespace LazyCache.Mocks
             return Task.FromResult(default(T));
         }
 
-        public IMemoryCache MemoryCache => null;
-
 
         public void Add<T>(string key, T item, TimeSpan slidingExpiration)
         {
@@ -81,6 +81,32 @@ namespace LazyCache.Mocks
         public T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
         {
             return addItemFactory.Invoke();
+        }
+    }
+
+    public class MockCacheProvider : ICacheProvider
+    {
+        public void Set(string key, object item, MemoryCacheEntryOptions policy)
+        {
+        }
+
+        public object Get(string key)
+        {
+            return null;
+        }
+
+        public object GetOrCreate<T>(string key, Func<ICacheEntry, T> func)
+        {
+            return func(null);
+        }
+
+        public void Remove(string key)
+        {
+        }
+
+        public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> func)
+        {
+            return func(null);
         }
     }
 }

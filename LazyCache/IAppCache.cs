@@ -6,7 +6,7 @@ namespace LazyCache
 {
     public interface IAppCache
     {
-        IMemoryCache MemoryCache { get; }
+        ICacheProvider CacheProvider { get; }
         void Add<T>(string key, T item);
         void Add<T>(string key, T item, DateTimeOffset absoluteExpiration);
         void Add<T>(string key, T item, TimeSpan slidingExpiration);

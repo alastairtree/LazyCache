@@ -1,132 +1,172 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache
 {
     public class CachingService : IAppCache
     {
-        public CachingService() : this(new MemoryCache(new MemoryCacheOptions()))
+        private readonly Lazy<ICacheProvider> cacheProvider;
+
+        public static Func<ICacheProvider> DefaultCacheProvider { get; set; } = () => new MemoryCacheProvider();
+
+        public CachingService() : this(DefaultCacheProvider)
         {
         }
 
-        public CachingService(IMemoryCache cache)
+        public CachingService(Func<ICacheProvider> cacheProviderFactory)
         {
-            MemoryCache = cache ?? throw new ArgumentNullException(nameof(cache));
-            DefaultCacheDuration = 60*20;
+            if (cacheProviderFactory == null) throw new ArgumentNullException(nameof(cacheProviderFactory));
+            cacheProvider = new Lazy<ICacheProvider>(cacheProviderFactory);
+            DefaultCacheDuration = 60 * 20;
+        }
+
+        public CachingService(ICacheProvider cache) : this(() => cache)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
         }
 
         /// <summary>
         /// Seconds to cache objects for by default
         /// </summary>
-        public int DefaultCacheDuration { get; set; }
+        public virtual int DefaultCacheDuration { get; set; }
 
         private DateTimeOffset DefaultExpiryDateTime => DateTimeOffset.Now.AddSeconds(DefaultCacheDuration);
 
-        public void Add<T>(string key, T item)
+        public virtual void Add<T>(string key, T item)
         {
             Add(key, item, DefaultExpiryDateTime);
         }
 
-        public void Add<T>(string key, T item, DateTimeOffset expires)
+        public virtual void Add<T>(string key, T item, DateTimeOffset expires)
         {
             Add(key, item, new MemoryCacheEntryOptions { AbsoluteExpiration = expires});
         }
 
-        public void Add<T>(string key, T item, TimeSpan slidingExpiration)
+        public virtual void Add<T>(string key, T item, TimeSpan slidingExpiration)
         {
             Add(key, item, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
+        public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             ValidateKey(key);
 
-            MemoryCache.Set(key, item, policy);
+            CacheProvider.Set(key, item, policy);
         }
 
-        public T Get<T>(string key)
+        public virtual T Get<T>(string key)
         {
             ValidateKey(key);
 
-            var item = MemoryCache.Get(key);
+            var item = CacheProvider.Get(key);
 
             return UnwrapLazy<T>(item);
         }
 
-
-        public async Task<T> GetAsync<T>(string key)
+        public virtual async Task<T> GetAsync<T>(string key)
         {
             ValidateKey(key);
 
-            var item = MemoryCache.Get(key);
+            var item = CacheProvider.Get(key);
 
             return await UnwrapAsyncLazys<T>(item);
         }
 
-
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory)
+        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory)
         {
             return GetOrAdd(key, addItemFactory, DefaultExpiryDateTime);
         }
 
-
-        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, MemoryCacheEntryOptions policy)
+        private SemaphoreSlim locker = new SemaphoreSlim(1,1);
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, MemoryCacheEntryOptions policy)
         {
             ValidateKey(key);
 
             EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(policy);
 
-            var cacheItem = MemoryCache.GetOrCreate(key, entry =>
-                {
-                    entry.SetOptions(policy);
-                    var value = new AsyncLazy<T>(addItemFactory);
-                    return (object) value;
-                }
-            );
+            //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
+            //    await new AsyncLazy<T>(async () => {
+            //        entry.SetOptions(policy);
+            //        return await addItemFactory.Invoke();
+            //    }
+            //).Value);
+
+            //var cacheItem = CacheProvider.GetOrCreateAsync<T>(key, async entry =>
+            //{
+            //    entry.SetOptions(policy);
+            //    return new AsyncLazy<T>(async () => await addItemFactory.Invoke());
+            //});
+
+            object cacheItem;
+            await locker.WaitAsync(); //TODO: do we really need this?
+            try
+            {
+                cacheItem = CacheProvider.GetOrCreate(key, entry =>
+                    {
+                        entry.SetOptions(policy);
+                        var value = new AsyncLazy<T>(addItemFactory);
+                        return (object) value;
+                    }
+                );
+            }
+            finally
+            {
+                locker.Release();
+            }
 
             try
             {
                 var result = UnwrapAsyncLazys<T>(cacheItem);
 
                 if (result.IsCanceled || result.IsFaulted)
-                    MemoryCache.Remove(key);
+                    CacheProvider.Remove(key);
 
                 return await result;
             }
             catch //addItemFactory errored so do not cache the exception
             {
-                MemoryCache.Remove(key);
+                CacheProvider.Remove(key);
                 throw;
             }
         }
 
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
+        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
         {
             return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
-
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, TimeSpan slidingExpiration)
+        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, TimeSpan slidingExpiration)
         {
             return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
+        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
         {
             ValidateKey(key);
 
             EnsureRemovedCallbackDoesNotReturnTheLazy<T>(policy);
 
-            var cacheItem = MemoryCache.GetOrCreate(key, entry =>
-                {
-                    entry.SetOptions(policy);
-                    var value = new Lazy<T>(addItemFactory);
-                    return (object)value;
-                }
-            );
+            object cacheItem;
+            locker.Wait(); //TODO: do we really need this?
+            try
+            {
+                cacheItem = CacheProvider.GetOrCreate(key, entry =>
+                    {
+                        entry.SetOptions(policy);
+                        var value = new Lazy<T>(addItemFactory);
+                        return (object) value;
+                    }
+                );
+            }
+            finally
+            {
+                locker.Release();
+            }
 
             try
             {
@@ -134,76 +174,69 @@ namespace LazyCache
             }
             catch //addItemFactory errored so do not cache the exception
             {
-                MemoryCache.Remove(key);
+                CacheProvider.Remove(key);
                 throw;
             }
         }
 
-
-        public void Remove(string key)
+        public virtual void Remove(string key)
         {
             ValidateKey(key);
-            MemoryCache.Remove(key);
+            CacheProvider.Remove(key);
         }
 
-        public IMemoryCache MemoryCache { get; }
+        public virtual ICacheProvider CacheProvider => cacheProvider.Value;
 
-        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
         {
             return await GetOrAddAsync(key, addItemFactory, DefaultExpiryDateTime);
         }
 
-        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
         {
             return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
-        public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
         {
             return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        private static T UnwrapLazy<T>(object item)
+        protected virtual T UnwrapLazy<T>(object item)
         {
-            var lazy = item as Lazy<T>;
-            if (lazy != null)
+            if (item is Lazy<T> lazy)
                 return lazy.Value;
 
-            if (item is T)
-                return (T) item;
+            if (item is T variable)
+                return variable;
 
-            var asyncLazy = item as AsyncLazy<T>;
-            if (asyncLazy != null)
+            if (item is AsyncLazy<T> asyncLazy)
                 return asyncLazy.Value.ConfigureAwait(false).GetAwaiter().GetResult();
 
-            var task = item as Task<T>;
-            if (task != null)
+            if (item is Task<T> task)
                 return task.Result;
 
             return default(T);
         }
 
-        private static async Task<T> UnwrapAsyncLazys<T>(object item)
+        protected virtual async Task<T> UnwrapAsyncLazys<T>(object item)
         {
-            var asyncLazy = item as AsyncLazy<T>;
-            if (asyncLazy != null)
+            if (item is AsyncLazy<T> asyncLazy)
                 return await asyncLazy.Value;
 
-            var task = item as Task<T>;
-            if (task != null)
+            if (item is Task<T> task)
                 return await task;
 
-            var lazy = item as Lazy<T>;
-            if (lazy != null)
+            if (item is Lazy<T> lazy)
                 return lazy.Value;
 
-            if (item is T)
-                return (T) item;
+            if (item is T variable)
+                return variable;
 
             return default(T);
         }
 
-        private static void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
+        protected virtual void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
         {
             if (policy?.PostEvictionCallbacks != null)
             {
@@ -221,7 +254,7 @@ namespace LazyCache
             }
         }
 
-        private static void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
+        protected virtual void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
         {
             if (policy?.PostEvictionCallbacks != null)
                 foreach (var item in policy.PostEvictionCallbacks)
@@ -239,7 +272,7 @@ namespace LazyCache
                 }
         }
 
-        private void ValidateKey(string key)
+        protected virtual void ValidateKey(string key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
