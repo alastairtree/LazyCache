@@ -5,7 +5,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LazyCacheVersion Condition="'$(LazyCacheVersion)' == ''">1.0.0</LazyCacheVersion>
-    <LazyCacheVersionSuffix></LazyCacheVersionSuffix>
+    <LazyCacheVersionSuffix Condition="'$(LazyCacheVersionSuffix)' == ''"></LazyCacheVersionSuffix>
     <Version>$(LazyCacheVersion)$(LazyCacheVersionSuffix)</Version>
     <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">$(APPVEYOR_BUILD_NUMBER)</AppVeyorBuildNumber>
     <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' == ''">0</AppVeyorBuildNumber>

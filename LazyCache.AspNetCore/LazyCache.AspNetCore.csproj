@@ -6,7 +6,7 @@
     <RootNamespace>LazyCache</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LazyCacheAspNetCoreVersion Condition="'$(LazyCacheAspNetCoreVersion)' == ''">1.0.0</LazyCacheAspNetCoreVersion>
-    <LazyCacheAspNetCoreVersionSuffix></LazyCacheAspNetCoreVersionSuffix>
+    <LazyCacheAspNetCoreVersionSuffix Condition="'$(LazyCacheAspNetCoreVersionSuffix)' == ''"></LazyCacheAspNetCoreVersionSuffix>
     <Version>$(LazyCacheAspNetCoreVersion)$(LazyCacheAspNetCoreVersionSuffix)</Version>
     <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">$(APPVEYOR_BUILD_NUMBER)</AppVeyorBuildNumber>
     <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' == ''">0</AppVeyorBuildNumber>
