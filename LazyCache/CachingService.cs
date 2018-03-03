@@ -16,11 +16,16 @@ namespace LazyCache
         {
         }
 
+        public CachingService(Lazy<ICacheProvider> cacheProvider)
+        {
+            this.cacheProvider = cacheProvider ?? throw new ArgumentNullException(nameof(cacheProvider));
+        }
+
+
         public CachingService(Func<ICacheProvider> cacheProviderFactory)
         {
             if (cacheProviderFactory == null) throw new ArgumentNullException(nameof(cacheProviderFactory));
             cacheProvider = new Lazy<ICacheProvider>(cacheProviderFactory);
-            DefaultCacheDuration = 60 * 20;
         }
 
         public CachingService(ICacheProvider cache) : this(() => cache)
@@ -28,14 +33,26 @@ namespace LazyCache
             if (cache == null) throw new ArgumentNullException(nameof(cache));
         }
 
-        public static Func<ICacheProvider> DefaultCacheProvider { get; set; } = () => new MemoryCacheProvider();
+        public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; } 
+            = new Lazy<ICacheProvider>(() => new MemoryCacheProvider());
 
         /// <summary>
-        ///     Seconds to cache objects for by default
+        /// Seconds to cache objects for by default
         /// </summary>
-        public virtual int DefaultCacheDuration { get; set; }
+        public virtual int DefaultCacheDurationSeconds { get; set; } = 60 * 20;
 
-        private DateTimeOffset DefaultExpiryDateTime => DateTimeOffset.Now.AddSeconds(DefaultCacheDuration);
+        /// <summary>
+        /// Seconds to cache objects for by default
+        /// </summary>
+        [Obsolete("DefaultCacheDuration has been replaced with DefaultCacheDurationSeconds")]
+
+        public virtual int DefaultCacheDuration
+        {
+            get => DefaultCacheDurationSeconds;
+            set => DefaultCacheDurationSeconds = value;
+        }
+
+        private DateTimeOffset DefaultExpiryDateTime => DateTimeOffset.Now.AddSeconds(DefaultCacheDurationSeconds);
 
         public virtual void Add<T>(string key, T item)
         {

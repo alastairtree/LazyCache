@@ -10,13 +10,18 @@ using NUnit.Framework;
 namespace LazyCache.UnitTests
 {
     [TestFixture]
-    public class CachingServiceTests
+    public class CachingService_MemoryCacheProvider_Tests
     {
         [SetUp]
         public void BeforeEachTest()
         {
-            sut = new CachingService(new MemoryCacheProvider());
+            sut = BuildCache();
             testObject = new ComplexTestObject();
+        }
+
+        private static CachingService BuildCache()
+        {
+            return new CachingService(new MemoryCacheProvider());
         }
 
         private CachingService sut;
@@ -197,11 +202,7 @@ namespace LazyCache.UnitTests
 
             var t2 = Task.Factory.StartNew(() =>
             {
-                sut.GetOrAdd(TestKey, () =>
-                {
-                    Interlocked.Increment(ref times);
-                    return new DateTime(2001, 01, 01);
-                });
+                sut.GetOrAdd<DateTime>(TestKey, () => throw new Exception("Should not be called!"));
             });
 
             Task.WaitAll(t1, t2);
@@ -214,6 +215,19 @@ namespace LazyCache.UnitTests
         {
             Action act = () => sut.Get<object>(null);
             act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void DefaultContructorThenGetOrAddFromSecondCachingServiceHasSharedUnderlyingCache()
+        {
+            var cacheOne = new CachingService();
+            var cacheTwo = new CachingService(); ; // second instance
+
+            var resultOne = cacheOne.GetOrAdd(TestKey, () => "resultOne");
+            var resultTwo = cacheTwo.GetOrAdd(TestKey, () => "resultTwo"); // should not get executed
+
+            resultOne.Should().Be("resultOne", "GetOrAdd should execute the delegate");
+            resultTwo.Should().Be("resultOne", "CachingService should use a shared cache by default");
         }
 
         [Test]
