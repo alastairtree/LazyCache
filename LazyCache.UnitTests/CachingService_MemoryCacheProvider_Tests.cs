@@ -425,30 +425,53 @@ namespace LazyCache.UnitTests
             Assert.That(actualResult.IsCompleted, Is.Not.True);
         }
 
-        // TODO: restore this test
-        //[Test, MaxTime(20000)]
-        //public async Task GetOrAddAsyncWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
-        //{
-        //    Func<Task<int>> fetch = () => Task.FromResult(123);
-        //    CacheEntryRemovedArguments removedCallbackArgs = null;
-        //    CacheEntryRemovedCallback callback = args => removedCallbackArgs = args;
-        //    await sut.GetOrAddAsync(TestKey, fetch,
-        //        new MemoryCacheEntryOptions
-        //        {
-        //            AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
-        //            PostEvictionCallbacks = { callback }
-        //        });
+        [Test, MaxTime(20000)]
+        public async Task GetOrAddAsyncWithPostEvictionCallbacksReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        {
+            object callbackValue = null;
+            var memoryCacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100)
+            };
+            memoryCacheEntryOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
+            {
+                callbackValue = value;
+            });
+            await sut.GetOrAddAsync(TestKey, () => Task.FromResult(123), memoryCacheEntryOptions);
 
-        //    sut.Remove(TestKey); //force removed callback to fire
-        //    while (removedCallbackArgs == null)
-        //        Thread.Sleep(500);
+            sut.Remove(TestKey); //force removed callback to fire
+            while (callbackValue == null)
+            {
+                Thread.Sleep(500);
+            }
 
-        //    var callbackResult = removedCallbackArgs.CacheItem.Value;
-        //    Assert.That(callbackResult, Is.AssignableTo<Task<int>>());
-        //    var callbackResultValue = await (Task<int>) removedCallbackArgs.CacheItem.Value;
+            Assert.That(callbackValue, Is.AssignableTo<Task<int>>());
+            var callbackResultValue = await (Task<int>) callbackValue;
+            Assert.AreEqual(123, callbackResultValue);
+        }
 
-        //    Assert.AreEqual(123, callbackResultValue);
-        //}
+        [Test, MaxTime(20000)]
+        public async Task GetOrAddAsyncWithPostEvictionCallbacksReturnsTheOriginalCachedKeyEvenIfNotGettedBeforehand()
+        {
+            string callbackKey = null;
+            var memoryCacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100)
+            };
+            memoryCacheEntryOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
+            {
+                callbackKey = key.ToString();
+            });
+            await sut.GetOrAddAsync(TestKey, () => Task.FromResult(123), memoryCacheEntryOptions);
+
+            sut.Remove(TestKey); //force removed callback to fire
+            while (callbackKey == null)
+            {
+                Thread.Sleep(500);
+            }
+
+            callbackKey.Should().Be(TestKey);
+        }
 
         [Test]
         public async Task GetOrAddAsyncWithOffsetWillAddAndReturnTaskOfCached()
@@ -560,25 +583,23 @@ namespace LazyCache.UnitTests
             Assert.AreEqual(0, times);
         }
 
-        //[Test, Timeout(20000)]
-        //public void GetOrAddWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
-        //{
-        //    Func<int> fetch = () => 123;
-        //    CacheEntryRemovedArguments removedCallbackArgs = null;
-        //    CacheEntryRemovedCallback callback = args => removedCallbackArgs = args;
-        //    sut.GetOrAdd(TestKey, fetch,
-        //        new MemoryCacheEntryOptions
-        //        {
-        //            AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
-        //            RemovedCallback = callback
-        //        });
+        [Test, MaxTime(20000)]
+        public void GetOrAddWithPostEvictionCallbackdReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
+        {
+            object cacheValue = null;
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(100),
+            }.RegisterPostEvictionCallback((key, value, reason, state) => cacheValue = value);
+            sut.GetOrAdd(TestKey, () => 123,
+                cacheEntryOptions);
 
-        //    sut.Remove(TestKey); //force removed callback to fire
-        //    while (removedCallbackArgs == null)
-        //        Thread.Sleep(500);
+            sut.Remove(TestKey); //force removed callback to fire
+            while (cacheValue == null)
+                Thread.Sleep(500);
 
-        //    Assert.AreEqual(123, removedCallbackArgs.CacheItem.Value);
-        //}
+            cacheValue.Should().Be(123);
+        }
 
         [Test]
         public void GetOrAddWithOffsetWillAddAndReturnCached()
