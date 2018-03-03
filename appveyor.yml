@@ -1,4 +1,4 @@
-version: '{LazyCacheVersion}.{build}{LazyCacheVersionSuffix}'
+version: '2.0.0.{build}'
 image: Visual Studio 2017
 configuration: Release
 environment:
