@@ -1,13 +1,11 @@
-version: 2.0.0.{build}-beta01
+version: '{LazyCacheVersion}.{build}{LazyCacheVersionSuffix}'
+image: Visual Studio 2017
 configuration: Release
-dotnet_csproj:
-  patch: true
-  file: '**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
-  assembly_version: '{version}'
-  file_version: '{version}'
-  informational_version: '{version}'
+environment:
+  LazyCacheVersion: 2.0.0
+  LazyCacheVersionSuffix: -beta01
+  LazyCacheAspNetCoreVersion: 2.0.0
+  LazyCacheAspNetCoreVersionSuffix: -beta01
 build_script:
 - ps: '& .\build.ps1'
 deploy: off

@@ -1,9 +1,15 @@
+<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <LazyCacheVersion Condition="'$(LazyCacheVersion)' == ''">1.0.0</LazyCacheVersion>
+    <LazyCacheVersionSuffix></LazyCacheVersionSuffix>
+    <Version>$(LazyCacheVersion)$(LazyCacheVersionSuffix)</Version>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">$(APPVEYOR_BUILD_NUMBER)</AppVeyorBuildNumber>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' == ''">0</AppVeyorBuildNumber>
+    <AssemblyVersion>$(LazyCacheVersion).$(AppVeyorBuildNumber)</AssemblyVersion>
     <Authors>https://github.com/alastairtree</Authors>
     <Company>https://github.com/alastairtree</Company>
     <Description>Lazy cache is a simple, thread safe in-memory caching service</Description>
