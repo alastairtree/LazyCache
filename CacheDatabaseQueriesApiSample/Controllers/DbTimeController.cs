@@ -11,11 +11,10 @@ namespace CacheDatabaseQueriesApiSample.Controllers
         private readonly DbTimeContext dbContext;
 
 
-        public DbTimeController(DbTimeContext context)
+        public DbTimeController(DbTimeContext context, IAppCache cache)
         {
-            // this could (and should) be passed in using dependency injection
-            cache = new CachingService();
             dbContext = context;
+            this.cache = cache;
         }
 
         [HttpGet]

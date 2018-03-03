@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using LazyCache;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,9 +20,16 @@ namespace CacheDatabaseQueriesApiSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            // just for demo - use app settings for db config
             var connection =
                 @"Server=(localdb)\projectsv13;Database=Master;Trusted_Connection=True;ConnectRetryCount=0";
+
+            // register the database
             services.AddDbContext<DbTimeContext>(options => options.UseSqlServer(connection));
+
+            // add a single instance of the cache (transiant would also work as default cache is shared)
+            services.AddSingleton<IAppCache, CachingService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
