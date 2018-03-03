@@ -28,8 +28,9 @@ namespace CacheDatabaseQueriesApiSample
             // register the database
             services.AddDbContext<DbTimeContext>(options => options.UseSqlServer(connection));
 
-            // add a single instance of the cache (transiant would also work as default cache is shared)
-            services.AddSingleton<IAppCache, CachingService>();
+            // Register IAppCache as a singleton CachingService
+            services.AddLazyCache();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LazyCache.AspNetCore\LazyCache.AspNetCore.csproj" />
     <ProjectReference Include="..\LazyCache\LazyCache.csproj" />
   </ItemGroup>
 
