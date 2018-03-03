@@ -10,7 +10,7 @@ namespace LazyCache
     {
         private readonly Lazy<ICacheProvider> cacheProvider;
 
-        public static Func<ICacheProvider> DefaultCacheProvider { get; set; } = () => new MemoryCacheProvider();
+        private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
 
         public CachingService() : this(DefaultCacheProvider)
         {
@@ -28,8 +28,10 @@ namespace LazyCache
             if (cache == null) throw new ArgumentNullException(nameof(cache));
         }
 
+        public static Func<ICacheProvider> DefaultCacheProvider { get; set; } = () => new MemoryCacheProvider();
+
         /// <summary>
-        /// Seconds to cache objects for by default
+        ///     Seconds to cache objects for by default
         /// </summary>
         public virtual int DefaultCacheDuration { get; set; }
 
@@ -42,7 +44,7 @@ namespace LazyCache
 
         public virtual void Add<T>(string key, T item, DateTimeOffset expires)
         {
-            Add(key, item, new MemoryCacheEntryOptions { AbsoluteExpiration = expires});
+            Add(key, item, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
         public virtual void Add<T>(string key, T item, TimeSpan slidingExpiration)
@@ -82,8 +84,8 @@ namespace LazyCache
             return GetOrAdd(key, addItemFactory, DefaultExpiryDateTime);
         }
 
-        private SemaphoreSlim locker = new SemaphoreSlim(1,1);
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, MemoryCacheEntryOptions policy)
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
+            MemoryCacheEntryOptions policy)
         {
             ValidateKey(key);
 
@@ -197,9 +199,11 @@ namespace LazyCache
             return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
+            TimeSpan slidingExpiration)
         {
-            return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
+            return await GetOrAddAsync(key, addItemFactory,
+                new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
         protected virtual T UnwrapLazy<T>(object item)
@@ -239,7 +243,6 @@ namespace LazyCache
         protected virtual void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
         {
             if (policy?.PostEvictionCallbacks != null)
-            {
                 foreach (var item in policy.PostEvictionCallbacks)
                 {
                     var originallCallback = item.EvictionCallback;
@@ -247,11 +250,11 @@ namespace LazyCache
                     {
                         //unwrap the cache item in a callback given one is specified
                         if (value is Lazy<T> cacheItem)
-                            value = cacheItem.IsValueCreated ? cacheItem.Value : default(T); ;
+                            value = cacheItem.IsValueCreated ? cacheItem.Value : default(T);
+                        ;
                         originallCallback(key, value, reason, state);
                     };
                 }
-            }
         }
 
         protected virtual void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
@@ -264,9 +267,7 @@ namespace LazyCache
                     {
                         //unwrap the cache item in a callback given one is specified
                         if (value is AsyncLazy<T> cacheItem)
-                        {
                             value = cacheItem.IsValueCreated ? cacheItem.Value : Task.FromResult(default(T));
-                        }
                         originalCallback(key, value, reason, state);
                     };
                 }

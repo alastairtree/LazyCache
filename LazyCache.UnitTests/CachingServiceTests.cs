@@ -21,11 +21,12 @@ namespace LazyCache.UnitTests
 
         private CachingService sut;
 
-        private readonly MemoryCacheEntryOptions oneHourNonRemoveableMemoryCacheEntryOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTimeOffset.Now.AddHours(1),
-            Priority = CacheItemPriority.NeverRemove
-        };
+        private readonly MemoryCacheEntryOptions oneHourNonRemoveableMemoryCacheEntryOptions =
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddHours(1),
+                Priority = CacheItemPriority.NeverRemove
+            };
 
         private ComplexTestObject testObject = new ComplexTestObject();
 
@@ -216,49 +217,67 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public async Task GetOrAddFollowinGetOrAddAsyncReturnsTheFirstObjectAndUnwrapsTheFirstTask()
-        {
-            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(testObject);
-            Func<ComplexTestObject> fetchSync = () => new ComplexTestObject();
-
-            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
-            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
-
-            Assert.IsNotNull(actualAsync);
-            Assert.That(actualAsync, Is.EqualTo(testObject));
-
-            Assert.IsNotNull(actualSync);
-            Assert.That(actualSync, Is.EqualTo(testObject));
-
-            Assert.AreEqual(actualAsync, actualSync);
-        }
-
-        [Test]
-        public async Task GetOrAddAsyncFollowinGetOrAddReturnsTheFirstObjectAndIgnoresTheSecondTask()
-        {
-            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(new ComplexTestObject());
-            Func<ComplexTestObject> fetchSync = () => testObject;
-
-            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
-            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
-
-
-            Assert.IsNotNull(actualSync);
-            Assert.That(actualSync, Is.EqualTo(testObject));
-
-            Assert.IsNotNull(actualAsync);
-            Assert.That(actualAsync, Is.EqualTo(testObject));
-
-            Assert.AreEqual(actualAsync, actualSync);
-        }
-
-        [Test]
         public void GetOrAddAndThenGetObjectReturnsCorrectType()
         {
             Func<ComplexTestObject> fetch = () => testObject;
             sut.GetOrAdd(TestKey, fetch);
             var actual = sut.Get<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
+        }
+
+        [Test]
+        public void GetOrAddAndThenGetValueObjectReturnsCorrectType()
+        {
+            Func<int> fetch = () => 123;
+            sut.GetOrAdd(TestKey, fetch);
+            var actual = sut.Get<int>(TestKey);
+            Assert.AreEqual(123, actual);
+        }
+
+        [Test]
+        public void GetOrAddAndThenGetWrongtypeObjectReturnsNull()
+        {
+            Func<ComplexTestObject> fetch = () => testObject;
+            sut.GetOrAdd(TestKey, fetch);
+            var actual = sut.Get<ApplicationException>(TestKey);
+            Assert.IsNull(actual);
+        }
+
+        [Test]
+        public void GetOrAddAsyncACancelledTaskDoesNotCacheIt()
+        {
+            Assert.ThrowsAsync<TaskCanceledException>(async () =>
+                await sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>));
+
+            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
+
+            Assert.That(stillCached, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddAsyncACancelledTaskReturnsTheCacelledTaskToConsumer()
+        {
+            var cancelledTask = sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>);
+
+            Assert.That(cancelledTask, Is.Not.Null);
+
+            Assert.Throws<AggregateException>(cancelledTask.Wait);
+
+            Assert.That(cancelledTask.IsCanceled, Is.True);
+        }
+
+        [Test]
+        public void GetOrAddAsyncAFailingTaskDoesNotCacheIt()
+        {
+            Func<Task<ComplexTestObject>> fetchAsync = () =>
+                Task<ComplexTestObject>.Factory.StartNew(
+                    () => { throw new ApplicationException(); });
+
+            Assert.ThrowsAsync<ApplicationException>(async () => await sut.GetOrAddAsync(TestKey, fetchAsync));
+
+            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
+
+            Assert.That(stillCached, Is.Null);
         }
 
         [Test]
@@ -281,21 +300,22 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public void GetOrAddAndThenGetValueObjectReturnsCorrectType()
+        public async Task GetOrAddAsyncFollowinGetOrAddReturnsTheFirstObjectAndIgnoresTheSecondTask()
         {
-            Func<int> fetch = () => 123;
-            sut.GetOrAdd(TestKey, fetch);
-            var actual = sut.Get<int>(TestKey);
-            Assert.AreEqual(123, actual);
-        }
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(new ComplexTestObject());
+            Func<ComplexTestObject> fetchSync = () => testObject;
 
-        [Test]
-        public void GetOrAddAndThenGetWrongtypeObjectReturnsNull()
-        {
-            Func<ComplexTestObject> fetch = () => testObject;
-            sut.GetOrAdd(TestKey, fetch);
-            var actual = sut.Get<ApplicationException>(TestKey);
-            Assert.IsNull(actual);
+            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
+            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
+
+
+            Assert.IsNotNull(actualSync);
+            Assert.That(actualSync, Is.EqualTo(testObject));
+
+            Assert.IsNotNull(actualAsync);
+            Assert.That(actualAsync, Is.EqualTo(testObject));
+
+            Assert.AreEqual(actualAsync, actualSync);
         }
 
         [Test]
@@ -373,6 +393,21 @@ namespace LazyCache.UnitTests
             Assert.AreEqual(0, times);
         }
 
+        [Test]
+        [MaxTime(1000)]
+        public void GetOrAddAsyncWithALongTaskReturnsBeforeTaskCompletes()
+        {
+            var cachedResult = testObject;
+            Func<Task<ComplexTestObject>> fetchAsync = () =>
+                Task.Delay(TimeSpan.FromMinutes(1)).ContinueWith(x => cachedResult);
+
+            var actualResult = sut.GetOrAddAsync(TestKey, fetchAsync);
+
+            Assert.That(actualResult, Is.Not.Null);
+            Assert.That(actualResult.IsCompleted, Is.Not.True);
+        }
+
+        // TODO: restore this test
         //[Test, MaxTime(20000)]
         //public async Task GetOrAddAsyncWithCallbackOnRemovedReturnsTheOriginalCachedObjectEvenIfNotGettedBeforehand()
         //{
@@ -404,7 +439,7 @@ namespace LazyCache.UnitTests
                 TestKey,
                 () => Task.FromResult(new DateTime(2001, 01, 01)),
                 DateTimeOffset.Now.AddSeconds(5)
-                );
+            );
             var expectedSecond = await sut.Get<Task<DateTime>>(TestKey);
 
             Assert.AreEqual(2001, expectedFirst.Year);
@@ -428,9 +463,28 @@ namespace LazyCache.UnitTests
             var cachedResult = testObject;
             Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(cachedResult);
 
-            var actualResult = await sut.GetOrAddAsync(TestKey, fetchAsync, oneHourNonRemoveableMemoryCacheEntryOptions);
+            var actualResult =
+                await sut.GetOrAddAsync(TestKey, fetchAsync, oneHourNonRemoveableMemoryCacheEntryOptions);
 
             Assert.That(actualResult, Is.EqualTo(cachedResult));
+        }
+
+        [Test]
+        public async Task GetOrAddFollowinGetOrAddAsyncReturnsTheFirstObjectAndUnwrapsTheFirstTask()
+        {
+            Func<Task<ComplexTestObject>> fetchAsync = () => Task.FromResult(testObject);
+            Func<ComplexTestObject> fetchSync = () => new ComplexTestObject();
+
+            var actualAsync = await sut.GetOrAddAsync(TestKey, fetchAsync);
+            var actualSync = sut.GetOrAdd(TestKey, fetchSync);
+
+            Assert.IsNotNull(actualAsync);
+            Assert.That(actualAsync, Is.EqualTo(testObject));
+
+            Assert.IsNotNull(actualSync);
+            Assert.That(actualSync, Is.EqualTo(testObject));
+
+            Assert.AreEqual(actualAsync, actualSync);
         }
 
         [Test]
@@ -515,7 +569,7 @@ namespace LazyCache.UnitTests
                 TestKey,
                 () => new DateTime(2001, 01, 01),
                 DateTimeOffset.Now.AddSeconds(5)
-                );
+            );
             var expectedSecond = sut.Get<DateTime>(TestKey);
 
             Assert.AreEqual(2001, expectedFirst.Year);
@@ -656,55 +710,6 @@ namespace LazyCache.UnitTests
             Assert.NotNull(sut.Get<object>(TestKey));
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
-        }
-
-        [Test]
-        [MaxTime(1000)]
-        public void GetOrAddAsyncWithALongTaskReturnsBeforeTaskCompletes()
-        {
-            var cachedResult = testObject;
-            Func<Task<ComplexTestObject>> fetchAsync = () => Task.Delay(TimeSpan.FromMinutes(1)).ContinueWith(x=> cachedResult);
-
-            var actualResult = sut.GetOrAddAsync(TestKey, fetchAsync);
-
-            Assert.That(actualResult, Is.Not.Null);
-            Assert.That(actualResult.IsCompleted, Is.Not.True);
-        }
-
-        [Test]
-        public void GetOrAddAsyncAFailingTaskDoesNotCacheIt()
-        {
-            Func<Task<ComplexTestObject>> fetchAsync = () => 
-                Task<ComplexTestObject>.Factory.StartNew(
-                    () => { throw new ApplicationException(); });
-
-            Assert.ThrowsAsync<ApplicationException>(async () => await sut.GetOrAddAsync(TestKey, fetchAsync));
-
-            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
-
-            Assert.That(stillCached, Is.Null);
-        }
-
-        [Test]
-        public void GetOrAddAsyncACancelledTaskDoesNotCacheIt()
-        {
-            Assert.ThrowsAsync<TaskCanceledException>(async () => await sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>));
-
-            var stillCached = sut.Get<Task<ComplexTestObject>>(TestKey);
-
-            Assert.That(stillCached, Is.Null);
-        }
-
-        [Test]
-        public void GetOrAddAsyncACancelledTaskReturnsTheCacelledTaskToConsumer()
-        {
-            var cancelledTask = sut.GetOrAddAsync(TestKey, AsyncHelper.CreateCancelledTask<ComplexTestObject>);
-
-            Assert.That(cancelledTask, Is.Not.Null);
-
-            Assert.Throws<AggregateException>(cancelledTask.Wait);
-
-            Assert.That(cancelledTask.IsCanceled, Is.True);
         }
     }
 }
