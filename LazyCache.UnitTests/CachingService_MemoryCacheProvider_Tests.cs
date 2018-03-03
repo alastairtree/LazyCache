@@ -202,7 +202,11 @@ namespace LazyCache.UnitTests
 
             var t2 = Task.Factory.StartNew(() =>
             {
-                sut.GetOrAdd<DateTime>(TestKey, () => throw new Exception("Should not be called!"));
+                sut.GetOrAdd(TestKey, () =>
+                {
+                    Interlocked.Increment(ref times);
+                    return new DateTime(2001, 01, 01);
+                });
             });
 
             Task.WaitAll(t1, t2);
