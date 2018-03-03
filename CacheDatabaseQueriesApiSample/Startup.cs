@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace CacheDatabaseQueriesApiSample
 {
@@ -25,7 +19,8 @@ namespace CacheDatabaseQueriesApiSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            var connection = @"Server=(localdb)\projectsv13;Database=Master;Trusted_Connection=True;ConnectRetryCount=0";
+            var connection =
+                @"Server=(localdb)\projectsv13;Database=Master;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<DbTimeContext>(options => options.UseSqlServer(connection));
         }
 
@@ -33,12 +28,10 @@ namespace CacheDatabaseQueriesApiSample
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
-            app.UseStaticFiles();
             app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

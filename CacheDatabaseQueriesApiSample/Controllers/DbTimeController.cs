@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using LazyCache;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,11 +20,11 @@ namespace CacheDatabaseQueriesApiSample.Controllers
 
         [HttpGet]
         [Route("api/dbtime")]
-        public DbTime Get()
+        public DbTimeEntity Get()
         {
-            Func<DbTime> cacheableAsyncFunc = () => dbContext.GeDbTime();
+            Func<DbTimeEntity> actionThatWeWantToCache = () => dbContext.GeDbTime();
 
-            var cachedDatabaseTime = cache.GetOrAdd(cacheKey, cacheableAsyncFunc);
+            var cachedDatabaseTime = cache.GetOrAdd(cacheKey, actionThatWeWantToCache);
 
             return cachedDatabaseTime;
         }

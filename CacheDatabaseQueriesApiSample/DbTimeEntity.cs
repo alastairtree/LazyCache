@@ -2,22 +2,22 @@
 
 namespace CacheDatabaseQueriesApiSample
 {
-    public class DbTime
+    /// <summary>
+    ///     Simulates loading a record from a table, but really just gets the current datatime from the database
+    /// </summary>
+    public class DbTimeEntity
     {
-        public DbTime(DateTime now)
+        public DbTimeEntity(DateTime now)
         {
             TimeNowInTheDatabase = now;
         }
 
-        public DbTime()
+        public DbTimeEntity()
         {
-            
         }
 
         public virtual int id { get; set; }
 
         public virtual DateTime TimeNowInTheDatabase { get; set; }
-
-
     }
 }
