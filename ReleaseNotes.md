@@ -4,7 +4,7 @@
 - *BREAKING CHANGE* Upgrade to netstandard2.0
 - *BREAKING CHANGE* Change underlying cache from System.Runtime.Caching to Microsft.Extension.Caching.Memory
 - *BREAKING CHANGE* Removed IAppCache.ObjectCache and changed to a cache provider model. 
-  To access the provider use IAppCache.CacheProvider. By default we use a static shared in-memory cache but add your own cache provider by implmenting the simple `ICacheProvider`.
+  To access the provider use IAppCache.CacheProvider. By default we use a singleton shared in-memory cache but add your own cache provider by implmenting the simple `ICacheProvider`.
 - *BREAKING CHANGE* changed from CacheItemPolicy to MemoryCacheEntryOptions. RemovedCallback is now PostEvictionCallbacks.
 - Added a new replaceable global static default cache provider 
     
@@ -12,6 +12,8 @@
   
   By default we use a shared in-memory cache but each instance can have it's underlying cache provider overridden from it's constructor.
 - Make methods on CachingService virtual
+- Add LazyCache.AspNetCore for dependency injection registration - ServiceCollection.AddLazyCache();
+- Update sample to use aspnet core and LazyCache.AspNetCore
 
 ## Version 0.7.1
 - Fix async/sync interopability bug, see https://github.com/alastairtree/LazyCache/issues/12
