@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
@@ -113,19 +114,28 @@ namespace LazyCache
 
         public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
         {
+            return GetOrAdd(key, entry =>
+            {
+                entry.SetOptions(policy);
+                return addItemFactory();
+            });
+        }
+
+        public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
+        {
             ValidateKey(key);
 
-            EnsureEvictionCallbackDoesNotReturnTheLazy<T>(policy);
-
             object cacheItem;
-            locker.Wait(); //TODO: do we really need this?
+            locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
+                    new Lazy<T>(() =>
                     {
-                        entry.SetOptions(policy);
-                        return new Lazy<T>(addItemFactory);
-                    }
+                        var result = addItemFactory(entry);
+                        EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                        return result;
+                    })
                 );
             }
             finally
@@ -169,12 +179,19 @@ namespace LazyCache
                 new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
+        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
             MemoryCacheEntryOptions policy)
         {
-            ValidateKey(key);
+            return GetOrAddAsync(key, entry =>
+            {
+                entry.SetOptions(policy);
+                return addItemFactory();
+            });
+        }
 
-            EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(policy);
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
+        {
+            ValidateKey(key);
 
             //any other way of doing this?
             //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
@@ -196,10 +213,12 @@ namespace LazyCache
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
+                    new AsyncLazy<T>(() =>
                     {
-                        entry.SetOptions(policy);
-                        return new AsyncLazy<T>(addItemFactory);
-                    }
+                        var result = addItemFactory(entry);
+                        EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                        return result;
+                    })
                 );
             }
             finally
@@ -257,34 +276,22 @@ namespace LazyCache
             return Task.FromResult(default(T));
         }
 
-        protected virtual void EnsureEvictionCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
+        protected virtual void EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(
+            IList<PostEvictionCallbackRegistration> callbackRegistrations)
         {
-            if (policy?.PostEvictionCallbacks != null)
-                foreach (var item in policy.PostEvictionCallbacks)
-                {
-                    var originallCallback = item.EvictionCallback;
-                    item.EvictionCallback = (key, value, reason, state) =>
-                    {
-                        //unwrap the cache item in a callback given one is specified
-                        if (value is Lazy<T> cacheItem)
-                            value = cacheItem.IsValueCreated ? cacheItem.Value : default(T);
-                        ;
-                        originallCallback(key, value, reason, state);
-                    };
-                }
-        }
-
-        protected virtual void EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
-        {
-            if (policy?.PostEvictionCallbacks != null)
-                foreach (var item in policy.PostEvictionCallbacks)
+            if (callbackRegistrations != null)
+                foreach (var item in callbackRegistrations)
                 {
                     var originalCallback = item.EvictionCallback;
                     item.EvictionCallback = (key, value, reason, state) =>
                     {
-                        //unwrap the cache item in a callback given one is specified
-                        if (value is AsyncLazy<T> cacheItem)
-                            value = cacheItem.IsValueCreated ? cacheItem.Value : Task.FromResult(default(T));
+                        // before the original callback we need to unwrap the Lazy that holds the cache item
+                        if (value is AsyncLazy<T> asyncCacheItem)
+                            value = asyncCacheItem.IsValueCreated ? asyncCacheItem.Value : Task.FromResult(default(T));
+                        else if (value is Lazy<T> cacheItem)
+                            value = cacheItem.IsValueCreated ? cacheItem.Value : default(T);
+
+                        // pass the unwrapped cached value to the original callback
                         originalCallback(key, value, reason, state);
                     };
                 }

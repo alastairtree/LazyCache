@@ -671,6 +671,7 @@ namespace LazyCache.UnitTests
             while (cacheValue == null)
                 Thread.Sleep(500);
 
+            cacheValue.Should().BeOfType<int>();
             cacheValue.Should().Be(123);
         }
 
