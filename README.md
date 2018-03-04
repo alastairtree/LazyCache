@@ -17,7 +17,11 @@ LazyCache is available using [nuget](https://www.nuget.org/packages/LazyCache/).
 PM> Install-Package LazyCache
 ```
 
-## Sample code ##
+## Quick start
+
+See the [quick start wiki](https://github.com/alastairtree/LazyCache/wiki/Quickstart)
+
+## Sample code
 
 ```csharp
 // Create our cache service using the defaults (Dependency injection ready).
