@@ -33,16 +33,16 @@ namespace LazyCache
             if (cache == null) throw new ArgumentNullException(nameof(cache));
         }
 
-        public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; } 
+        public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; }
             = new Lazy<ICacheProvider>(() => new MemoryCacheProvider());
 
         /// <summary>
-        /// Seconds to cache objects for by default
+        ///     Seconds to cache objects for by default
         /// </summary>
         public virtual int DefaultCacheDurationSeconds { get; set; } = 60 * 20;
 
         /// <summary>
-        /// Seconds to cache objects for by default
+        ///     Seconds to cache objects for by default
         /// </summary>
         [Obsolete("DefaultCacheDuration has been replaced with DefaultCacheDurationSeconds")]
 
@@ -101,60 +101,6 @@ namespace LazyCache
             return GetOrAdd(key, addItemFactory, DefaultExpiryDateTime);
         }
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
-            MemoryCacheEntryOptions policy)
-        {
-            ValidateKey(key);
-
-            EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(policy);
-
-            //any other way of doing this?
-            //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
-            //    await new AsyncLazy<T>(async () => {
-            //        entry.SetOptions(policy);
-            //        return await addItemFactory.Invoke();
-            //    }
-            //).Value);
-
-            //var cacheItem = CacheProvider.GetOrCreateAsync<T>(key, async entry =>
-            //{
-            //    entry.SetOptions(policy);
-            //    return new AsyncLazy<T>(async () => await addItemFactory.Invoke());
-            //});
-
-            object cacheItem;
-            await locker.WaitAsync().ConfigureAwait(false); //TODO: do we really need to lock - or can we lock just the key?
-            try
-            {
-                cacheItem = CacheProvider.GetOrCreate(key, entry =>
-                    {
-                        entry.SetOptions(policy);
-                        var value = new AsyncLazy<T>(addItemFactory);
-                        return (object) value;
-                    }
-                );
-            }
-            finally
-            {
-                locker.Release();
-            }
-
-            try
-            {
-                var result = UnwrapAsyncLazys<T>(cacheItem);
-
-                if (result.IsCanceled || result.IsFaulted)
-                    CacheProvider.Remove(key);
-
-                return await result.ConfigureAwait(false);
-            }
-            catch //addItemFactory errored so do not cache the exception
-            {
-                CacheProvider.Remove(key);
-                throw;
-            }
-        }
-
         public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
         {
             return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
@@ -175,11 +121,10 @@ namespace LazyCache
             locker.Wait(); //TODO: do we really need this?
             try
             {
-                cacheItem = CacheProvider.GetOrCreate(key, entry =>
+                cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
                     {
                         entry.SetOptions(policy);
-                        var value = new Lazy<T>(addItemFactory);
-                        return (object) value;
+                        return new Lazy<T>(addItemFactory);
                     }
                 );
             }
@@ -222,6 +167,60 @@ namespace LazyCache
         {
             return GetOrAddAsync(key, addItemFactory,
                 new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
+        }
+
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
+            MemoryCacheEntryOptions policy)
+        {
+            ValidateKey(key);
+
+            EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(policy);
+
+            //any other way of doing this?
+            //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
+            //    await new AsyncLazy<T>(async () => {
+            //        entry.SetOptions(policy);
+            //        return await addItemFactory.Invoke();
+            //    }
+            //).Value);
+
+            //var cacheItem = CacheProvider.GetOrCreateAsync<T>(key, async entry =>
+            //{
+            //    entry.SetOptions(policy);
+            //    return new AsyncLazy<T>(async () => await addItemFactory.Invoke());
+            //});
+
+            object cacheItem;
+            await locker.WaitAsync()
+                .ConfigureAwait(false); //TODO: do we really need to lock - or can we lock just the key?
+            try
+            {
+                cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
+                    {
+                        entry.SetOptions(policy);
+                        return new AsyncLazy<T>(addItemFactory);
+                    }
+                );
+            }
+            finally
+            {
+                locker.Release();
+            }
+
+            try
+            {
+                var result = UnwrapAsyncLazys<T>(cacheItem);
+
+                if (result.IsCanceled || result.IsFaulted)
+                    CacheProvider.Remove(key);
+
+                return await result.ConfigureAwait(false);
+            }
+            catch //addItemFactory errored so do not cache the exception
+            {
+                CacheProvider.Remove(key);
+                throw;
+            }
         }
 
         protected virtual T UnwrapLazy<T>(object item)
