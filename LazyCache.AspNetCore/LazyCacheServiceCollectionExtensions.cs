@@ -23,7 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddLazyCache(this IServiceCollection services, Func<IServiceProvider, CachingService> implmentationFactory)
+        public static IServiceCollection AddLazyCache(this IServiceCollection services,
+            Func<IServiceProvider, CachingService> implmentationFactory)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (implmentationFactory == null) throw new ArgumentNullException(nameof(implmentationFactory));

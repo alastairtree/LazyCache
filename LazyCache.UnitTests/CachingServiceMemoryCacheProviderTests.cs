@@ -24,7 +24,7 @@ namespace LazyCache.UnitTests
             return new CachingService(new MemoryCacheProvider());
         }
 
-        private CachingService sut;
+        private IAppCache sut;
 
         private readonly MemoryCacheEntryOptions oneHourNonRemoveableMemoryCacheEntryOptions =
             new MemoryCacheEntryOptions
@@ -173,6 +173,12 @@ namespace LazyCache.UnitTests
             sut.Add(TestKey, "testObject", new TimeSpan(750));
             Thread.Sleep(1500);
             Assert.IsNull(sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void CacheProviderIsNotNull()
+        {
+            sut.CacheProvider.Should().NotBeNull();
         }
 
         [Test]
@@ -626,7 +632,11 @@ namespace LazyCache.UnitTests
         [Test]
         public void GetOrAddWithPolicyAndThenGetValueObjectReturnsCorrectType()
         {
-            int Fetch() => 123;
+            int Fetch()
+            {
+                return 123;
+            }
+
             sut.GetOrAdd(TestKey, Fetch, oneHourNonRemoveableMemoryCacheEntryOptions);
             var actual = sut.Get<int>(TestKey);
             Assert.AreEqual(123, actual);

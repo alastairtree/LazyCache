@@ -22,7 +22,6 @@ namespace LazyCache
             this.cacheProvider = cacheProvider ?? throw new ArgumentNullException(nameof(cacheProvider));
         }
 
-
         public CachingService(Func<ICacheProvider> cacheProviderFactory)
         {
             if (cacheProviderFactory == null) throw new ArgumentNullException(nameof(cacheProviderFactory));
@@ -40,35 +39,17 @@ namespace LazyCache
         /// <summary>
         ///     Seconds to cache objects for by default
         /// </summary>
-        public virtual int DefaultCacheDurationSeconds { get; set; } = 60 * 20;
-
-        /// <summary>
-        ///     Seconds to cache objects for by default
-        /// </summary>
         [Obsolete("DefaultCacheDuration has been replaced with DefaultCacheDurationSeconds")]
-
         public virtual int DefaultCacheDuration
         {
-            get => DefaultCacheDurationSeconds;
-            set => DefaultCacheDurationSeconds = value;
+            get => DefaultCachePolicy.DefaultCacheDurationSeconds;
+            set => DefaultCachePolicy.DefaultCacheDurationSeconds = value;
         }
 
-        private DateTimeOffset DefaultExpiryDateTime => DateTimeOffset.Now.AddSeconds(DefaultCacheDurationSeconds);
-
-        public virtual void Add<T>(string key, T item)
-        {
-            Add(key, item, DefaultExpiryDateTime);
-        }
-
-        public virtual void Add<T>(string key, T item, DateTimeOffset expires)
-        {
-            Add(key, item, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
-        }
-
-        public virtual void Add<T>(string key, T item, TimeSpan slidingExpiration)
-        {
-            Add(key, item, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
-        }
+        /// <summary>
+        ///     Policy defining how long items should be cached for unless specified
+        /// </summary>
+        public virtual CacheDefaults DefaultCachePolicy { get; set; } = new CacheDefaults();
 
         public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
@@ -95,30 +76,6 @@ namespace LazyCache
             var item = CacheProvider.Get(key);
 
             return UnwrapAsyncLazys<T>(item);
-        }
-
-        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory)
-        {
-            return GetOrAdd(key, addItemFactory, DefaultExpiryDateTime);
-        }
-
-        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
-        {
-            return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
-        }
-
-        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, TimeSpan slidingExpiration)
-        {
-            return GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
-        }
-
-        public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory, MemoryCacheEntryOptions policy)
-        {
-            return GetOrAdd(key, entry =>
-            {
-                entry.SetOptions(policy);
-                return addItemFactory();
-            });
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
@@ -161,33 +118,6 @@ namespace LazyCache
         }
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
-
-        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
-        {
-            return GetOrAddAsync(key, addItemFactory, DefaultExpiryDateTime);
-        }
-
-        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
-        {
-            return GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
-        }
-
-        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
-            TimeSpan slidingExpiration)
-        {
-            return GetOrAddAsync(key, addItemFactory,
-                new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
-        }
-
-        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
-            MemoryCacheEntryOptions policy)
-        {
-            return GetOrAddAsync(key, entry =>
-            {
-                entry.SetOptions(policy);
-                return addItemFactory();
-            });
-        }
 
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
