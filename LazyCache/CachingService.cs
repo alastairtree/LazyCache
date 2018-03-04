@@ -87,13 +87,13 @@ namespace LazyCache
             return UnwrapLazy<T>(item);
         }
 
-        public virtual async Task<T> GetAsync<T>(string key)
+        public virtual Task<T> GetAsync<T>(string key)
         {
             ValidateKey(key);
 
             var item = CacheProvider.Get(key);
 
-            return await UnwrapAsyncLazys<T>(item);
+            return UnwrapAsyncLazys<T>(item);
         }
 
         public virtual T GetOrAdd<T>(string key, Func<T> addItemFactory)
@@ -106,8 +106,9 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(policy);
+            EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(policy);
 
+            //any other way of doing this?
             //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
             //    await new AsyncLazy<T>(async () => {
             //        entry.SetOptions(policy);
@@ -122,7 +123,7 @@ namespace LazyCache
             //});
 
             object cacheItem;
-            await locker.WaitAsync(); //TODO: do we really need this?
+            await locker.WaitAsync().ConfigureAwait(false); //TODO: do we really need to lock - or can we lock just the key?
             try
             {
                 cacheItem = CacheProvider.GetOrCreate(key, entry =>
@@ -145,7 +146,7 @@ namespace LazyCache
                 if (result.IsCanceled || result.IsFaulted)
                     CacheProvider.Remove(key);
 
-                return await result;
+                return await result.ConfigureAwait(false);
             }
             catch //addItemFactory errored so do not cache the exception
             {
@@ -168,7 +169,7 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            EnsureRemovedCallbackDoesNotReturnTheLazy<T>(policy);
+            EnsureEvictionCallbackDoesNotReturnTheLazy<T>(policy);
 
             object cacheItem;
             locker.Wait(); //TODO: do we really need this?
@@ -206,20 +207,20 @@ namespace LazyCache
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
+        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
         {
-            return await GetOrAddAsync(key, addItemFactory, DefaultExpiryDateTime);
+            return GetOrAddAsync(key, addItemFactory, DefaultExpiryDateTime);
         }
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
+        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
         {
-            return await GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
+            return GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
+        public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory,
             TimeSpan slidingExpiration)
         {
-            return await GetOrAddAsync(key, addItemFactory,
+            return GetOrAddAsync(key, addItemFactory,
                 new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
         }
 
@@ -240,24 +241,24 @@ namespace LazyCache
             return default(T);
         }
 
-        protected virtual async Task<T> UnwrapAsyncLazys<T>(object item)
+        protected virtual Task<T> UnwrapAsyncLazys<T>(object item)
         {
             if (item is AsyncLazy<T> asyncLazy)
-                return await asyncLazy.Value;
+                return asyncLazy.Value;
 
             if (item is Task<T> task)
-                return await task;
+                return task;
 
             if (item is Lazy<T> lazy)
-                return lazy.Value;
+                return Task.FromResult(lazy.Value);
 
             if (item is T variable)
-                return variable;
+                return Task.FromResult(variable);
 
-            return default(T);
+            return Task.FromResult(default(T));
         }
 
-        protected virtual void EnsureRemovedCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
+        protected virtual void EnsureEvictionCallbackDoesNotReturnTheLazy<T>(MemoryCacheEntryOptions policy)
         {
             if (policy?.PostEvictionCallbacks != null)
                 foreach (var item in policy.PostEvictionCallbacks)
@@ -274,7 +275,7 @@ namespace LazyCache
                 }
         }
 
-        protected virtual void EnsureRemovedCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
+        protected virtual void EnsureEvictionCallbackDoesNotReturnTheAsyncLazy<T>(MemoryCacheEntryOptions policy)
         {
             if (policy?.PostEvictionCallbacks != null)
                 foreach (var item in policy.PostEvictionCallbacks)
