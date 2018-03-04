@@ -6,7 +6,7 @@ namespace LazyCache.Providers
 {
     public class MemoryCacheProvider : ICacheProvider
     {
-        private readonly IMemoryCache cache;
+        internal readonly IMemoryCache cache;
 
         public MemoryCacheProvider() : this(new MemoryCache(new MemoryCacheOptions()))
         {
@@ -40,6 +40,11 @@ namespace LazyCache.Providers
         public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> factory)
         {
             return cache.GetOrCreateAsync(key, factory);
+        }
+
+        public void Dispose()
+        {
+            cache?.Dispose();
         }
     }
 }

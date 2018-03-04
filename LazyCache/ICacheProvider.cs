@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache
 {
-    public interface ICacheProvider
+    public interface ICacheProvider : IDisposable
     {
         void Set(string key, object item, MemoryCacheEntryOptions policy);
         object Get(string key);

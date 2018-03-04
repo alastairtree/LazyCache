@@ -108,5 +108,9 @@ namespace LazyCache.Mocks
         {
             return func(null);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }
