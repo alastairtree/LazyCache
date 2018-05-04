@@ -29,7 +29,7 @@ Func<ComplexObjects> complexObjectFactory = () => methodThatTakesTimeOrResources
 
 // Get our ComplexObjects from the cache, or build them in the factory func 
 // and cache the results for next time under the given key
-ComplexObject cachedResults = cache.GetOrAdd("uniqueKey", complexObjectFactory);
+ComplexObjects cachedResults = cache.GetOrAdd("uniqueKey", complexObjectFactory);
 ```
 
 As you can see the magic happens in the `GetOrAdd()` method which gives the consumer an atomic and tidy way to add caching to your code. It leverages a factory delegate `Func` and generics to make it easy to add cached method calls to your app. 

@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/alastairtree/LazyCache</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Lazy cache is a simple,thread safe in-memory caching service</description>
+    <description>Lazy cache is a simple, thread safe in-memory caching service</description>
     <releaseNotes>See https://raw.githubusercontent.com/alastairtree/LazyCache/master/ReleaseNotes.md</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <summary>Lazy cache is a simple in-memory caching service for .net and c sharp. It has a developer friendly generics based API, and providing a thread safe cache implementation that guarantees to only execute your cachable delegates once (it's lazy!). Under the hood it leverages ObjectCache and Lazy to provide performance and reliability in heavy load scenarios. For more info see https://github.com/alastairtree/LazyCache </summary>
