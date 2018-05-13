@@ -1,4 +1,4 @@
-<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
+﻿<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,13 +12,13 @@
     <AssemblyVersion>$(LazyCacheVersion).$(AppVeyorBuildNumber)</AssemblyVersion>
     <Authors>https://github.com/alastairtree</Authors>
     <Company>https://github.com/alastairtree</Company>
-    <Description>Lazy cache is a simple, thread safe in-memory caching service</Description>
+    <Description>Lazy cache is a simple, thread safe, in-memory caching library that makes it easy to add high performance caching to your dotnet app.</Description>
     <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
     <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
     <PackageLicenseUrl>https://github.com/alastairtree/LazyCache/blob/master/LICENSE</PackageLicenseUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
-    <PackageTags>Caching Performance Speed In-memory ObjectCache Generics ServiceCacheing Lazy Cache Lazy-Load MemoryCache CachingService AppCache ApplicationCache Memcached</PackageTags>
+    <PackageTags>Caching Performance Speed In-memory IMemoryCache Generics ServiceCacheing Lazy Cache Lazy-Load MemoryCache CachingService AppCache ApplicationCache Memcached</PackageTags>
     <PackageReleaseNotes>See https://raw.githubusercontent.com/alastairtree/LazyCache/master/ReleaseNotes.md</PackageReleaseNotes>
   </PropertyGroup>
 

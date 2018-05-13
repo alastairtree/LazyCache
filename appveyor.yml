@@ -3,9 +3,9 @@ image: Visual Studio 2017
 configuration: Release
 environment:
   LazyCacheVersion: 2.0.0
-  LazyCacheVersionSuffix: -beta01
+  LazyCacheVersionSuffix: -beta03
   LazyCacheAspNetCoreVersion: 2.0.0
-  LazyCacheAspNetCoreVersionSuffix: -beta01
+  LazyCacheAspNetCoreVersionSuffix: -beta03
 build_script:
 - ps: '& .\build.ps1'
 deploy: off

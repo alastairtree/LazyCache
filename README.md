@@ -69,11 +69,11 @@ For .net framework 4.0 use LazyCache 0.6
 
 ## Documentation
 
-* [the wiki](https://github.com/alastairtree/LazyCache/wiki)
+* [The wiki](https://github.com/alastairtree/LazyCache/wiki)
 * [Adding caching to a .net application and make it faster](https://alastaircrabtree.com/the-easy-way-to-add-caching-to-net-application-and-make-it-faster-is-called-lazycache/)
 
 ## Sample Application
 
-See [/Samples/CacheDatabaseQueriesApiSample](https://github.com/alastairtree/LazyCache/tree/master/CacheDatabaseQueriesApiSample) for an example of how to use LazyCache to cache the results of an Entity framework query in
+See [CacheDatabaseQueriesApiSample](/CacheDatabaseQueriesApiSample) for an example of how to use LazyCache to cache the results of an Entity framework query in
 a web api controller. Watch how the cache saves trips to the database and results are returned to the client far quicker from the 
 in-memory cache
