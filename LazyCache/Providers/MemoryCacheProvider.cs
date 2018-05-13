@@ -8,10 +8,6 @@ namespace LazyCache.Providers
     {
         internal readonly IMemoryCache cache;
 
-        public MemoryCacheProvider() : this(new MemoryCache(new MemoryCacheOptions()))
-        {
-        }
-
         public MemoryCacheProvider(IMemoryCache cache)
         {
             this.cache = cache;

@@ -21,7 +21,7 @@ namespace LazyCache.UnitTests
 
         private static CachingService BuildCache()
         {
-            return new CachingService(new MemoryCacheProvider());
+            return new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
         }
 
         private IAppCache sut;

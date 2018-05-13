@@ -7,12 +7,17 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache
 {
+    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class CachingService : IAppCache
     {
         private readonly Lazy<ICacheProvider> cacheProvider;
 
         private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
 
+        [Obsolete("LazyCache is designed for dependency injection, this constructor exists for " +
+                  "backwards compatibility and will be removed at a later date. Consider depending " +
+                  "on IAppCache rather than constructing manually. You may need to dispose of " +
+                  "DefaultCacheProvider.Value if this is used.")]
         public CachingService() : this(DefaultCacheProvider)
         {
         }
@@ -34,7 +39,11 @@ namespace LazyCache
         }
 
         public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; }
-            = new Lazy<ICacheProvider>(() => new MemoryCacheProvider());
+            = new Lazy<ICacheProvider>(() => 
+                new MemoryCacheProvider(
+                    new MemoryCache(
+                        new MemoryCacheOptions())
+                ));
 
         /// <summary>
         ///     Seconds to cache objects for by default
@@ -66,7 +75,7 @@ namespace LazyCache
 
             var item = CacheProvider.Get(key);
 
-            return UnwrapLazy<T>(item);
+            return GetValueFromLazy<T>(item);
         }
 
         public virtual Task<T> GetAsync<T>(string key)
@@ -75,7 +84,7 @@ namespace LazyCache
 
             var item = CacheProvider.Get(key);
 
-            return UnwrapAsyncLazys<T>(item);
+            return GetValueFromAsyncLazy<T>(item);
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
@@ -102,7 +111,7 @@ namespace LazyCache
 
             try
             {
-                return UnwrapLazy<T>(cacheItem);
+                return GetValueFromLazy<T>(cacheItem);
             }
             catch //addItemFactory errored so do not cache the exception
             {
@@ -123,23 +132,16 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            //any other way of doing this?
-            //var cacheItem = CacheProvider.GetOrCreateAsync(key, async entry =>
-            //    await new AsyncLazy<T>(async () => {
-            //        entry.SetOptions(policy);
-            //        return await addItemFactory.Invoke();
-            //    }
-            //).Value);
-
-            //var cacheItem = CacheProvider.GetOrCreateAsync<T>(key, async entry =>
-            //{
-            //    entry.SetOptions(policy);
-            //    return new AsyncLazy<T>(async () => await addItemFactory.Invoke());
-            //});
-
             object cacheItem;
+
+            // Ensure only one thread can place an item into the cache provider at a time.
+            // We are not evaluating the addItemFactory inside here - that happens outside the lock,
+            // below, and guarded using the async lazy. Here we just ensure only one thread can place 
+            // the AsyncLazy into the cache at one time
+
             await locker.WaitAsync()
-                .ConfigureAwait(false); //TODO: do we really need to lock - or can we lock just the key?
+                .ConfigureAwait(
+                    false); //TODO: do we really need to lock everything here - faster if we could lock on just the key?
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
@@ -158,7 +160,7 @@ namespace LazyCache
 
             try
             {
-                var result = UnwrapAsyncLazys<T>(cacheItem);
+                var result = GetValueFromAsyncLazy<T>(cacheItem);
 
                 if (result.IsCanceled || result.IsFaulted)
                     CacheProvider.Remove(key);
@@ -172,36 +174,40 @@ namespace LazyCache
             }
         }
 
-        protected virtual T UnwrapLazy<T>(object item)
+        protected virtual T GetValueFromLazy<T>(object item)
         {
-            if (item is Lazy<T> lazy)
-                return lazy.Value;
-
-            if (item is T variable)
-                return variable;
-
-            if (item is AsyncLazy<T> asyncLazy)
-                return asyncLazy.Value.ConfigureAwait(false).GetAwaiter().GetResult();
-
-            if (item is Task<T> task)
-                return task.Result;
+            switch (item)
+            {
+                case Lazy<T> lazy:
+                    return lazy.Value;
+                case T variable:
+                    return variable;
+                case AsyncLazy<T> asyncLazy:
+                    // this is async to sync - and should not really happen as long as GetOrAddAsync is used for an async
+                    // value. Only happens when you cache something async and then try and grab it again later using
+                    // the non async methods.
+                    return asyncLazy.Value.ConfigureAwait(false).GetAwaiter().GetResult();
+                case Task<T> task:
+                    return task.Result;
+            }
 
             return default(T);
         }
 
-        protected virtual Task<T> UnwrapAsyncLazys<T>(object item)
+        protected virtual Task<T> GetValueFromAsyncLazy<T>(object item)
         {
-            if (item is AsyncLazy<T> asyncLazy)
-                return asyncLazy.Value;
-
-            if (item is Task<T> task)
-                return task;
-
-            if (item is Lazy<T> lazy)
-                return Task.FromResult(lazy.Value);
-
-            if (item is T variable)
-                return Task.FromResult(variable);
+            switch (item)
+            {
+                case AsyncLazy<T> asyncLazy:
+                    return asyncLazy.Value;
+                case Task<T> task:
+                    return task;
+                // this is sync to async and only happens if you cache something sync and then get it later async
+                case Lazy<T> lazy:
+                    return Task.FromResult(lazy.Value);
+                case T variable:
+                    return Task.FromResult(variable);
+            }
 
             return Task.FromResult(default(T));
         }
