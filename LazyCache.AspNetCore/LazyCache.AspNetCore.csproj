@@ -1,4 +1,4 @@
-<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
+﻿<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -15,12 +15,13 @@
     <Company>https://github.com/alastairtree</Company>
     <Description>ServiceCollection regististrations fopr LazyCache to initialise the depndency injection</Description>
     <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
-    <PackageLicenseUrl>https://github.com/alastairtree/LazyCache/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
     <PackageTags>LazyCache DependecyInjection ServiceCollection SingleTon Transient</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="microsoft.extensions.dependencyinjection.abstractions" Version="2.0.0" />
