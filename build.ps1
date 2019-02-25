@@ -32,6 +32,7 @@ Try {
 
 	# Get dependencies from nuget and compile
 	Exec { dotnet restore }
+	Exec { nuget restore Console.Net461 -SolutionDirectory . }
 	Exec { dotnet build --configuration $config --no-restore }
 
 	# Find each test project and run tests. upload results to AppVeyor
