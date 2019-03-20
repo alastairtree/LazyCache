@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache.Mocks
 {
@@ -10,51 +10,26 @@ namespace LazyCache.Mocks
     /// </summary>
     public class MockCachingService : IAppCache
     {
-        public void Add<T>(string key, T item)
-        {
-        }
-
-        public void Add<T>(string key, T item, DateTimeOffset expires)
-        {
-        }
+        public ICacheProvider CacheProvider { get; } = new MockCacheProvider();
+        public CacheDefaults DefaultCachePolicy { get; set; }
 
         public T Get<T>(string key)
         {
             return default(T);
         }
 
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory)
+        public T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
         {
-            return addItemFactory.Invoke();
-        }
-
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, DateTimeOffset expires)
-        {
-            return addItemFactory.Invoke();
+            return addItemFactory(new MockCacheEntry(key));
         }
 
         public void Remove(string key)
         {
         }
 
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, CacheItemPolicy policy)
+        public Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
-            return addItemFactory.Invoke();
-        }
-
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory)
-        {
-            return addItemFactory.Invoke();
-        }
-
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, DateTimeOffset expires)
-        {
-            return addItemFactory.Invoke();
-        }
-
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> addItemFactory, TimeSpan slidingExpiration)
-        {
-            return addItemFactory.Invoke();
+            return addItemFactory(new MockCacheEntry(key));
         }
 
         public Task<T> GetAsync<T>(string key)
@@ -62,25 +37,8 @@ namespace LazyCache.Mocks
             return Task.FromResult(default(T));
         }
 
-        public ObjectCache ObjectCache => null;
-
-
-        public void Add<T>(string key, T item, TimeSpan slidingExpiration)
+        public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
-        }
-
-        public void Add<T>(string key, T item, CacheItemPolicy policy)
-        {
-        }
-
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, TimeSpan slidingExpiration)
-        {
-            return addItemFactory.Invoke();
-        }
-
-        public T GetOrAdd<T>(string key, Func<T> addItemFactory, CacheItemPolicy policy)
-        {
-            return addItemFactory.Invoke();
         }
     }
 }

@@ -1,0 +1,11 @@
+version: '2.0.0.{build}'
+image: Visual Studio 2017
+configuration: Release
+environment:
+  LazyCacheVersion: 2.0.0
+  LazyCacheVersionSuffix: 
+  LazyCacheAspNetCoreVersion: 2.0.0
+  LazyCacheAspNetCoreVersionSuffix: 
+build_script:
+- ps: '& .\build.ps1'
+deploy: off

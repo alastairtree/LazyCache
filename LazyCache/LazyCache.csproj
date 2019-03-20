@@ -1,66 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E6A1EF20-94AD-4A1C-9A89-3B2FA8AD8EC7}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LazyCache</RootNamespace>
-    <AssemblyName>LazyCache</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <LazyCacheVersion Condition="'$(LazyCacheVersion)' == ''">1.0.0</LazyCacheVersion>
+    <LazyCacheVersionSuffix Condition="'$(LazyCacheVersionSuffix)' == ''"></LazyCacheVersionSuffix>
+    <Version>$(LazyCacheVersion)$(LazyCacheVersionSuffix)</Version>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">$(APPVEYOR_BUILD_NUMBER)</AppVeyorBuildNumber>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' == ''">0</AppVeyorBuildNumber>
+    <AssemblyVersion>$(LazyCacheVersion).$(AppVeyorBuildNumber)</AssemblyVersion>
+    <Authors>https://github.com/alastairtree</Authors>
+    <Company>https://github.com/alastairtree</Company>
+    <Description>Lazy cache is a simple, thread safe, in-memory caching library that makes it easy to add high performance caching to your dotnet app.</Description>
+    <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
+    <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
+    <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
+    <PackageTags>Caching Performance Speed In-memory IMemoryCache Generics ServiceCacheing Lazy Cache Lazy-Load MemoryCache CachingService AppCache ApplicationCache Memcached</PackageTags>
+    <PackageReleaseNotes>See https://raw.githubusercontent.com/alastairtree/LazyCache/master/ReleaseNotes.md</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.2.0" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.2.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AsyncLazy.cs" />
-    <Compile Include="CachingService.cs" />
-    <Compile Include="IAppCache.cs" />
-    <Compile Include="Mocks\MockCachingService.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="LazyCache.nuspec">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

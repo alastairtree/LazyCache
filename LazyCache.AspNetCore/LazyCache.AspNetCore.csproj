@@ -1,0 +1,33 @@
+﻿<!--EXTERNAL_PROPERTIES: APPVEYOR_BUILD_NUMBER-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>LazyCache</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <LazyCacheAspNetCoreVersion Condition="'$(LazyCacheAspNetCoreVersion)' == ''">1.0.0</LazyCacheAspNetCoreVersion>
+    <LazyCacheAspNetCoreVersionSuffix Condition="'$(LazyCacheAspNetCoreVersionSuffix)' == ''"></LazyCacheAspNetCoreVersionSuffix>
+    <Version>$(LazyCacheAspNetCoreVersion)$(LazyCacheAspNetCoreVersionSuffix)</Version>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' != ''">$(APPVEYOR_BUILD_NUMBER)</AppVeyorBuildNumber>
+    <AppVeyorBuildNumber Condition="'$(APPVEYOR_BUILD_NUMBER)' == ''">0</AppVeyorBuildNumber>
+    <AssemblyVersion>$(LazyCacheAspNetCoreVersion).$(AppVeyorBuildNumber)</AssemblyVersion>
+    <Authors>https://github.com/alastairtree</Authors>
+    <Company>https://github.com/alastairtree</Company>
+    <Description>ServiceCollection regististrations fopr LazyCache to initialise the depndency injection</Description>
+    <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
+    <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
+    <PackageTags>LazyCache DependecyInjection ServiceCollection SingleTon Transient</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="microsoft.extensions.dependencyinjection.abstractions" Version="2.2.0" />
+    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.2.0" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.2.0" />
+    <ProjectReference Include="..\LazyCache\LazyCache.csproj" />
+  </ItemGroup>
+
+</Project>
