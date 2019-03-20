@@ -14,10 +14,6 @@ namespace LazyCache
 
         private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
 
-        [Obsolete("LazyCache is designed for dependency injection, this constructor exists for " +
-                  "backwards compatibility and will be removed at a later date. Consider depending " +
-                  "on IAppCache rather than constructing manually. You may need to dispose of " +
-                  "DefaultCacheProvider.Value if this is used.")]
         public CachingService() : this(DefaultCacheProvider)
         {
         }
