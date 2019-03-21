@@ -23,6 +23,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.AspNetCore", "Laz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console.Net461", "Console.Net461\Console.Net461.csproj", "{32142F20-DFCE-4DF0-A263-093111E5A3FA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.Ninject", "LazyCache.Ninject\LazyCache.Ninject.csproj", "{6FF349C3-D20C-493C-87A3-5A193538FE13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache.Ninject.UnitTests", "LazyCache.Ninject.UnitTests\LazyCache.Ninject.UnitTests.csproj", "{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{32142F20-DFCE-4DF0-A263-093111E5A3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32142F20-DFCE-4DF0-A263-093111E5A3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32142F20-DFCE-4DF0-A263-093111E5A3FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FF349C3-D20C-493C-87A3-5A193538FE13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FF349C3-D20C-493C-87A3-5A193538FE13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FF349C3-D20C-493C-87A3-5A193538FE13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FF349C3-D20C-493C-87A3-5A193538FE13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

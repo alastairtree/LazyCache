@@ -18,7 +18,7 @@
     <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
-    <PackageTags>LazyCache DependecyInjection ServiceCollection SingleTon Transient</PackageTags>
+    <PackageTags>LazyCache DependecyInjection ServiceCollection Singleton Transient</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
