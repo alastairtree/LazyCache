@@ -24,16 +24,16 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         public static IServiceCollection AddLazyCache(this IServiceCollection services,
-            Func<IServiceProvider, CachingService> implmentationFactory)
+            Func<IServiceProvider, CachingService> implementationFactory)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
-            if (implmentationFactory == null) throw new ArgumentNullException(nameof(implmentationFactory));
+            if (implementationFactory == null) throw new ArgumentNullException(nameof(implementationFactory));
 
             services.AddOptions();
             services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
             services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>());
 
-            services.TryAdd(ServiceDescriptor.Singleton<IAppCache>(implmentationFactory));
+            services.TryAdd(ServiceDescriptor.Singleton<IAppCache>(implementationFactory));
 
             return services;
         }
