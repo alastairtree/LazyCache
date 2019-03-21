@@ -1,6 +1,7 @@
 ﻿using System;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Ninject.Modules;
 
 namespace LazyCache
@@ -21,8 +22,7 @@ namespace LazyCache
         // See also https://github.com/aspnet/Caching/blob/dev/src/Microsoft.Extensions.Caching.Memory/MemoryCacheServiceCollectionExtensions.cs
         public override void Load()
         {
-            // Note: We are assuming that IOptions<> is already setup in Ninject.
-
+            Bind<IOptions<MemoryCacheOptions>>().ToConstant(Options.Create(new MemoryCacheOptions()));
             Bind<IMemoryCache>().To<MemoryCache>().InSingletonScope();
             Bind<ICacheProvider>().To<MemoryCacheProvider>().InSingletonScope();
 

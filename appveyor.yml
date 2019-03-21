@@ -6,6 +6,8 @@ environment:
   LazyCacheVersionSuffix: 
   LazyCacheAspNetCoreVersion: 2.0.0
   LazyCacheAspNetCoreVersionSuffix: 
+  LazyCacheNinjectVersion: 2.0.0
+  LazyCacheNinjectVersionSuffix: 
 build_script:
 - ps: '& .\build.ps1'
 deploy: off
