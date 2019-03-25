@@ -25,7 +25,7 @@ namespace CacheDatabaseQueriesApiSample
             // get the current time from SQL server right now asynchronously (simulating a slow query)
             var result = Times
                 .FromSql("WAITFOR DELAY '00:00:00:500'; SELECT 1 as [ID], GETDATE() as [TimeNowInTheDatabase]")
-                .Single();
+                .SingleOrDefault();
 
             databaseRequestCounter++;
 

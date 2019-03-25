@@ -2,6 +2,7 @@
 using LazyCache;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace - MS guidelines say put DI registration in this NS
@@ -15,10 +16,9 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services == null) throw new ArgumentNullException(nameof(services));
 
             services.AddOptions();
-            services.TryAdd(ServiceDescriptor.Singleton<IDistributedCache, MemoryDistributedCache>());
-            services.TryAdd(ServiceDescriptor.Singleton<IDistributedCacheProvider, DistributedCacheProvider>());
-
-            services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>());
+            services.TryAddSingleton<IDistributedCache, MemoryDistributedCache>();
+            services.TryAddSingleton<IDistributedCacheProvider, DistributedCacheProvider>();
+            services.TryAddSingleton<IDistributedAppCache, DistributedCachingService>();
 
             return services;
         }
@@ -30,9 +30,37 @@ namespace Microsoft.Extensions.DependencyInjection
             if (implementationFactory == null) throw new ArgumentNullException(nameof(implementationFactory));
 
             services.AddOptions();
-            services.TryAdd(ServiceDescriptor.Singleton<IDistributedCacheProvider, DistributedCacheProvider>());
+            services.TryAddSingleton<IDistributedCacheProvider, DistributedCacheProvider>();
+            services.TryAddSingleton<IDistributedAppCache>(implementationFactory);
 
-            services.TryAdd(ServiceDescriptor.Singleton<IDistributedAppCache>(implementationFactory));
+            return services;
+        }
+
+        public static IServiceCollection AddDistributedHybridLazyCache(this IServiceCollection services)
+        {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+
+            services.AddOptions();
+            services.TryAddSingleton<IMemoryCache, MemoryCache>();
+            services.TryAddSingleton<IDistributedCache, MemoryDistributedCache>();
+            services.TryAddSingleton<DistributedCacheProvider>();
+            services.TryAddSingleton<IDistributedCacheProvider>(provider => new HybridCacheProvider(provider.GetRequiredService<DistributedCacheProvider>(), provider.GetRequiredService<IMemoryCache>()));
+            services.TryAddSingleton<IDistributedAppCache, HybridCachingService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddDistributedHybridLazyCache(this IServiceCollection services,
+            Func<IServiceProvider, HybridCachingService> implementationFactory)
+        {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+            if (implementationFactory == null) throw new ArgumentNullException(nameof(implementationFactory));
+
+            services.AddOptions();
+            services.TryAddSingleton<IMemoryCache, MemoryCache>();
+            services.TryAddSingleton<DistributedCacheProvider>();
+            services.TryAddSingleton<IDistributedCacheProvider>(provider => new HybridCacheProvider(provider.GetRequiredService<DistributedCacheProvider>(), provider.GetRequiredService<IMemoryCache>()));
+            services.TryAddSingleton<IDistributedAppCache>(implementationFactory);
 
             return services;
         }

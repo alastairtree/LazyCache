@@ -58,6 +58,7 @@ namespace LazyCache.Providers
         public void Remove(string key)
         {
             distributedCacheProvider.Remove(key);
+            memoryCache.Remove(key);
         }
 
         private bool TryGetValue<T>(string key, out T value)
