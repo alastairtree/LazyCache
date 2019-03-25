@@ -7,6 +7,7 @@ using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using NUnit.Framework;
 
 namespace LazyCache.UnitTests
@@ -21,12 +22,13 @@ namespace LazyCache.UnitTests
             testObject = new ComplexTestObject();
         }
 
-        private static DistributedCachingService BuildCache()
+        private static HybridCachingService BuildCache()
         {
             var options = new MemoryDistributedCacheOptions();
             IDistributedCache memoryDistributedCache = new MemoryDistributedCache(Options.Create(options));
             IDistributedCacheProvider distributedCacheProvider = new DistributedCacheProvider(memoryDistributedCache);
-            return new DistributedCachingService(distributedCacheProvider);
+            IDistributedCacheProvider hybridCacheProvider = new HybridCacheProvider(distributedCacheProvider, new MemoryCache(Options.Create(new MemoryCacheOptions())));
+            return new HybridCachingService(hybridCacheProvider);
         }
 
         private IDistributedAppCache sut;
@@ -322,7 +324,7 @@ namespace LazyCache.UnitTests
             await sut.GetOrAddAsync(TestKey, () => Task.FromResult(testObject));
             var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
-            Assert.That(actual, Is.EqualTo(testObject));
+            Assert.AreEqual(actual.ToJson(), testObject.ToJson());
         }
 
         [Test]
@@ -350,12 +352,12 @@ namespace LazyCache.UnitTests
             var actualAsync = await sut.GetOrAddAsync(TestKey, FetchAsync);
 
             Assert.IsNotNull(actualSync);
-            Assert.That(actualSync, Is.EqualTo(testObject));
+            Assert.That(actualSync.ToJson(), Is.EqualTo(testObject.ToJson()));
 
             Assert.IsNotNull(actualAsync);
-            Assert.That(actualAsync, Is.EqualTo(testObject));
+            Assert.That(actualAsync.ToJson(), Is.EqualTo(testObject.ToJson()));
 
-            Assert.AreEqual(actualAsync, actualSync);
+            Assert.AreEqual(actualAsync.ToJson(), actualSync.ToJson());
         }
 
         [Test]
@@ -367,15 +369,15 @@ namespace LazyCache.UnitTests
             Assert.Null(actual);
         }
 
-        [Test]
-        public async Task GetOrAddAsyncTaskAndThenGetTaskOfObjectReturnsCorrectType()
-        {
-            var cachedAsyncResult = testObject;
-            await sut.GetOrAddAsync(TestKey, () => Task.FromResult(cachedAsyncResult));
-            var actual = sut.Get<Task<ComplexTestObject>>(TestKey);
-            Assert.IsNotNull(actual);
-            Assert.That(actual.Result, Is.EqualTo(cachedAsyncResult));
-        }
+        //[Test]
+        //public async Task GetOrAddAsyncTaskAndThenGetTaskOfObjectReturnsCorrectType()
+        //{
+        //    var cachedAsyncResult = testObject;
+        //    await sut.GetOrAddAsync(TestKey, () => Task.FromResult(cachedAsyncResult));
+        //    var actual = sut.Get<Task<ComplexTestObject>>(TestKey);
+        //    Assert.IsNotNull(actual);
+        //    Assert.That(actual.Result, Is.EqualTo(cachedAsyncResult));
+        //}
 
         [Test]
         public async Task GetOrAddAsyncWillAddOnFirstCall()
@@ -439,7 +441,7 @@ namespace LazyCache.UnitTests
 
             Task<ComplexTestObject> FetchAsync()
             {
-                return Task.Delay(TimeSpan.FromMinutes(1))
+                return Task.Delay(TimeSpan.FromSeconds(5))
                     .ContinueWith(x => cachedResult);
             }
 
@@ -457,7 +459,7 @@ namespace LazyCache.UnitTests
                 () => Task.FromResult(new DateTime(2001, 01, 01)),
                 DateTimeOffset.Now.AddSeconds(5)
             );
-            var expectedSecond = await sut.Get<Task<DateTime>>(TestKey);
+            var expectedSecond = await sut.GetAsync<DateTime>(TestKey);
 
             Assert.AreEqual(2001, expectedFirst.Year);
             Assert.AreEqual(2001, expectedSecond.Year);
@@ -469,8 +471,8 @@ namespace LazyCache.UnitTests
             var item = testObject;
             await sut.GetOrAddAsync(TestKey, () => Task.FromResult(item),
                 oneHourNonRemoveableDistributedCacheEntryOptions);
-            var actual = await sut.Get<Task<ComplexTestObject>>(TestKey);
-            Assert.That(actual, Is.EqualTo(item));
+            var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
+            Assert.That(actual.ToBson(), Is.EqualTo(item.ToBson()));
         }
 
 
@@ -507,12 +509,12 @@ namespace LazyCache.UnitTests
             var actualSync = sut.GetOrAdd(TestKey, FetchSync);
 
             Assert.IsNotNull(actualAsync);
-            Assert.That(actualAsync, Is.EqualTo(testObject));
+            Assert.That(actualAsync.ToBson(), Is.EqualTo(testObject.ToBson()));
 
             Assert.IsNotNull(actualSync);
-            Assert.That(actualSync, Is.EqualTo(testObject));
+            Assert.That(actualSync.ToBson(), Is.EqualTo(testObject.ToBson()));
 
-            Assert.AreEqual(actualAsync, actualSync);
+            Assert.AreEqual(actualAsync.ToBson(), actualSync.ToBson());
         }
 
         [Test]
@@ -635,7 +637,7 @@ namespace LazyCache.UnitTests
         {
             var cached = new EventArgs();
             sut.Add(TestKey, cached);
-            Assert.AreEqual(cached, sut.Get<EventArgs>(TestKey));
+            Assert.AreEqual(cached.ToJson(), sut.Get<EventArgs>(TestKey).ToJson());
         }
 
         [Test]
