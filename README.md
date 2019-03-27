@@ -80,3 +80,13 @@ For .net framework 4.0 use LazyCache 0.6
 See [CacheDatabaseQueriesApiSample](/CacheDatabaseQueriesApiSample) for an example of how to use LazyCache to cache the results of an Entity framework query in
 a web api controller. Watch how the cache saves trips to the database and results are returned to the client far quicker from the 
 in-memory cache
+
+## Contributing
+
+If you have an idea or want to fix an issue please open an issue on Github to discuss it and it will be considered. 
+
+If you have code to share you should submit a pull request: fork the repo, then create a branch on that repo with your changes, when you are happy create a pull Request from your branch into LazyCache master for review. See https://help.github.com/en/articles/creating-a-pull-request-from-a-fork. 
+
+LazyCache is narrow in focus and well established so unlikely to accept massive changes out of nowhere but come talk about on GitHub and we can all collaborate on something that works for everyone. It is also quite extensible so you may be able to extend it in your project or add a companion library if necessary.
+
+
