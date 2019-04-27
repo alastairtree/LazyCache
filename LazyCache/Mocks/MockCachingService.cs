@@ -11,7 +11,7 @@ namespace LazyCache.Mocks
     public class MockCachingService : IAppCache
     {
         public ICacheProvider CacheProvider { get; } = new MockCacheProvider();
-        public CacheDefaults DefaultCachePolicy { get; set; }
+        public CacheDefaults DefaultCachePolicy { get; set; } = new CacheDefaults();
 
         public T Get<T>(string key)
         {
