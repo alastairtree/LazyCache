@@ -42,13 +42,14 @@ Try {
 		
 			Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore --logger:"trx;LogFileName=..\..\test-result.trx" }
 	
+			$testResults = (Resolve-Path .\test-result*.trx)
 			# if on build server upload results to AppVeyor
 			if ("${ENV:APPVEYOR_JOB_ID}" -ne "") {
 				$wc = New-Object 'System.Net.WebClient'
-				$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test-result.trx)) 
+				$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $testResults) 
 			}
 
-			Remove-Item .\test-result.trx -ErrorAction SilentlyContinue
+			Remove-Item $testResults -ErrorAction SilentlyContinue
 	}
 
 	# Publish the nupkg artifacts
