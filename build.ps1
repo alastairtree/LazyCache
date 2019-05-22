@@ -40,7 +40,7 @@ Try {
 		Where-Object { $_.Name -match ".*Test(s)?.csproj$"} | 
 		ForEach-Object { 
 		
-			Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore --logger "trx;LogFileName=..\..\test-result.trx" }
+			Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore --logger:"trx;LogFileName=..\..\test-result.trx" }
 	
 			# if on build server upload results to AppVeyor
 			if ("${ENV:APPVEYOR_JOB_ID}" -ne "") {
