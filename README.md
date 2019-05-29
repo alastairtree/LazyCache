@@ -64,6 +64,7 @@ For .net framework 4.0 use LazyCache 0.6
 - Simple API with familiar sliding or absolute expiration
 - Guaranteed single evaluation of your factory delegate whose results you want to cache
 - Strongly typed generics based API. No need to cast your cached objects every time you retieve them
+- Stops you inadvertently caching an exception by removing Lazys that evaluate to an exception
 - Thread safe, concurrency ready
 - Async compatible - lazy single evaluation of async delegates using `GetOrAddAsync()`
 - Interface based API and built in `MockCache` to support test driven development and dependency injection
