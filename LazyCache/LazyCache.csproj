@@ -23,8 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.2.0" />
-    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.2.0" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.1.2" />
   </ItemGroup>
 
 </Project>
