@@ -95,6 +95,7 @@ namespace LazyCache
                     new Lazy<T>(() =>
                     {
                         var result = addItemFactory(entry);
+                        SetAbsoluteExpirationFromRelative(entry);
                         EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
                         return result;
                     })
@@ -114,6 +115,15 @@ namespace LazyCache
                 CacheProvider.Remove(key);
                 throw;
             }
+        }
+
+        private static void SetAbsoluteExpirationFromRelative(ICacheEntry entry)
+        {
+            if (!entry.AbsoluteExpirationRelativeToNow.HasValue) return;
+            
+            var absoluteExpiration = DateTimeOffset.UtcNow + entry.AbsoluteExpirationRelativeToNow.Value;
+            if (!entry.AbsoluteExpiration.HasValue || absoluteExpiration < entry.AbsoluteExpiration)
+                entry.AbsoluteExpiration = absoluteExpiration;
         }
 
         public virtual void Remove(string key)
@@ -144,6 +154,7 @@ namespace LazyCache
                     new AsyncLazy<T>(() =>
                     {
                         var result = addItemFactory(entry);
+                        SetAbsoluteExpirationFromRelative(entry);
                         EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
                         return result;
                     })

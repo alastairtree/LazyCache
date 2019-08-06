@@ -686,6 +686,29 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddWithAbsoluteExpirationRelativeToNowExpires()
+        {
+            sut.GetOrAdd(TestKey, e =>
+            {
+                e.SetAbsoluteExpiration(new TimeSpan(750));
+                return "testObject";
+            });
+            Thread.Sleep(1500);
+            Assert.IsNull(sut.Get<string>(TestKey));
+        } 
+        [Test]
+        public async Task GetOrAddWithAbsoluteAsyncExpirationRelativeToNowExpires()
+        {
+            await sut.GetOrAddAsync(TestKey, e =>
+            {
+                e.SetAbsoluteExpiration(new TimeSpan(750));
+                return Task.FromResult("testObject");
+            });
+            Thread.Sleep(1500);
+            Assert.IsNull(sut.Get<string>(TestKey));
+        }
+        
+        [Test]
         public void GetWithClassTypeParamReturnsType()
         {
             var cached = new EventArgs();
