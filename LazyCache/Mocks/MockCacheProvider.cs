@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -21,6 +22,10 @@ namespace LazyCache.Mocks
         }
 
         public void Remove(string key)
+        {
+        }
+
+        public void Remove(Func<IEnumerable<string>, IEnumerable<string>> keyPredicate)
         {
         }
 
