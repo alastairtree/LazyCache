@@ -24,5 +24,7 @@ namespace LazyCache
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory);
 
         void Remove(string key);
+
+        void RemoveAll();
     }
 }

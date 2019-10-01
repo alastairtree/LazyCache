@@ -6,11 +6,13 @@ namespace LazyCache.Providers
 {
     public class MemoryCacheProvider : ICacheProvider
     {
-        internal readonly IMemoryCache cache;
+        internal readonly Func<IMemoryCache> cacheFactory;
+        internal IMemoryCache cache;
 
-        public MemoryCacheProvider(IMemoryCache cache)
+        public MemoryCacheProvider(Func<IMemoryCache> cacheFactory)
         {
-            this.cache = cache;
+            this.cacheFactory = cacheFactory;
+            cache = cacheFactory();
         }
 
         public void Set(string key, object item, MemoryCacheEntryOptions policy)
@@ -31,6 +33,11 @@ namespace LazyCache.Providers
         public void Remove(string key)
         {
             cache.Remove(key);
+        }
+
+        public void RemoveAll()
+        {
+            cache = cacheFactory();
         }
 
         public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> factory)

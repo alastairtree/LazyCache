@@ -27,6 +27,10 @@ namespace LazyCache.Mocks
         {
         }
 
+        public void RemoveAll()
+        {
+        }
+
         public Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
             return addItemFactory(new MockCacheEntry(key));

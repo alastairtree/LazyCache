@@ -24,6 +24,10 @@ namespace LazyCache.Mocks
         {
         }
 
+        public void RemoveAll()
+        {
+        }
+
         public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> func)
         {
             return func(null);
