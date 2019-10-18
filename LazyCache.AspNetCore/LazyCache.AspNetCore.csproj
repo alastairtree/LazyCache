@@ -13,7 +13,7 @@
     <AssemblyVersion>$(LazyCacheAspNetCoreVersion).$(AppVeyorBuildNumber)</AssemblyVersion>
     <Authors>https://github.com/alastairtree</Authors>
     <Company>https://github.com/alastairtree</Company>
-    <Description>ServiceCollection regististrations fopr LazyCache to initialise the depndency injection</Description>
+    <Description>ServiceCollection registrations for LazyCache to initialise the dependency injection collection and add enable IAppCache to be injected into your app</Description>
     <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
     <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
