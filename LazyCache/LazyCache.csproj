@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LazyCacheVersion Condition="'$(LazyCacheVersion)' == ''">1.0.0</LazyCacheVersion>
@@ -25,6 +26,9 @@
   <ItemGroup>
     <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.2.0" />
     <PackageReference Include="microsoft.extensions.caching.memory" Version="2.2.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.8.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

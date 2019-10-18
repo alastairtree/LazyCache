@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using LazyCache;
+using LazyCache.Providers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,6 +32,12 @@ namespace CacheDatabaseQueriesApiSample
 
             // Register IAppCache as a singleton CachingService
             services.AddLazyCache();
+
+            services.AddMemoryCache();
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<DistributedCacheProvider>();
+            services.AddTransient<IDistributedCacheProvider>(provider => new HybridCacheProvider(provider.GetRequiredService<DistributedCacheProvider>(), provider.GetRequiredService<IMemoryCache>()));
+            services.AddDistributedHybridLazyCache(provider => new HybridCachingService(provider.GetRequiredService<IDistributedCacheProvider>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
