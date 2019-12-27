@@ -12,13 +12,6 @@ namespace LazyCache.UnitTests
     [TestFixture]
     public class CachingServiceMemoryCacheProviderTests
     {
-        [SetUp]
-        public void BeforeEachTest()
-        {
-            sut = BuildCache();
-            testObject = new ComplexTestObject();
-        }
-
         private static CachingService BuildCache()
         {
             return new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
@@ -42,6 +35,13 @@ namespace LazyCache.UnitTests
         }
 
         private const string TestKey = "testKey";
+
+        [SetUp]
+        public void BeforeEachTest()
+        {
+            sut = BuildCache();
+            testObject = new ComplexTestObject();
+        }
 
 
         [Test]
