@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LazyCache\LazyCache.csproj" />
+    <ProjectReference Include="..\LazyCache.AspNetCore\LazyCache.AspNetCore.csproj" />
+    <ProjectReference Include="..\LazyCache.Ninject\LazyCache.Ninject.csproj" />
+    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="3.1.0" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="3.1.0" />
+  </ItemGroup>
+
+</Project>
