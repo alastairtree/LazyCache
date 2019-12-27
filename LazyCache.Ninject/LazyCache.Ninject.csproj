@@ -16,16 +16,18 @@
     <Description>Ninject module regististrations for LazyCache to initialise dependency injection</Description>
     <Copyright>Copyright 2014 - 2018 Alastair Crabtree</Copyright>
     <PackageProjectUrl>https://github.com/alastairtree/LazyCache</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-128.png</PackageIconUrl>
+    <PackageIcon>logo-128.png</PackageIcon>
     <RepositoryUrl>https://github.com/alastairtree/LazyCache</RepositoryUrl>
     <PackageTags>LazyCache DependecyInjection ServiceCollection SingleTon Transient Ninject</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.2.0" />
-    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.2.0" />
-    <PackageReference Include="Ninject" Version="3.3.4" />
+    <None Include="..\artwork\logo-128.png" Pack="true" PackagePath=""/>
+
+    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="2.1.0" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="2.1.0" />
+    <PackageReference Include="Ninject" Version="3.3.0" />
     <ProjectReference Include="..\LazyCache\LazyCache.csproj" />
   </ItemGroup>
 
