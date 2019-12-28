@@ -1,5 +1,14 @@
 # Release notes for LazyCache #
 
+## Version 2.0.3
+- Fix #46 GetOrAdd and GetOrAddAsync returning nulll if there is already an item with the same key but different type in the cache (PR #106)
+
+## Version 2.0.2
+- Fix #71. Downgrade framework references to core framework 2.1 (not 2.2) since that is the current LTS release (PR #105)
+
+## Version 2.0.1
+- Add Ninject adapter (PR #61)
+
 ## Version 2.0.0
 - *BREAKING CHANGE* Upgrade to netstandard2.0
 - *BREAKING CHANGE* Change underlying cache from System.Runtime.Caching to Microsft.Extension.Caching.Memory
