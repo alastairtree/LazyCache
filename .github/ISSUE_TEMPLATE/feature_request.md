@@ -9,7 +9,7 @@ assignees: ''
 
 <!-- Leave this section here so others know to vote for your feature  -->
 
-Use the Thumbs Up reaction to vote for this feature, and please avoid adding comments like "+1" as they create noise for others watching the issue.
+[Use the Thumbs Up reaction to vote for this feature, and please avoid adding comments like "+1" as they create noise for others watching the issue.]
 
 <!-- end -->
 
