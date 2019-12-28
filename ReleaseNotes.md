@@ -1,5 +1,8 @@
 # Release notes for LazyCache #
 
+## Version 2.0.4
+- Fix #82 Make constructor resolution  specific when using aspnet core dependency injection
+
 ## Version 2.0.3
 - Fix #46 GetOrAdd and GetOrAddAsync returning nulll if there is already an item with the same key but different type in the cache (PR #106)
 
