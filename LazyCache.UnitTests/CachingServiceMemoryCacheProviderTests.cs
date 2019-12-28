@@ -253,6 +253,15 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddAndThenGetOrAddDifferentTypeDoesLastInWins()
+        {
+            var first = sut.GetOrAdd(TestKey, () => new object());
+            var second = sut.GetOrAdd(TestKey, () => testObject);
+            Assert.IsNotNull(second);
+            Assert.IsInstanceOf<ComplexTestObject>(second);
+        }
+
+        [Test]
         public void GetOrAddAndThenGetValueObjectReturnsCorrectType()
         {
             sut.GetOrAdd(TestKey, () => 123);
@@ -267,6 +276,8 @@ namespace LazyCache.UnitTests
             var actual = sut.Get<ApplicationException>(TestKey);
             Assert.IsNull(actual);
         }
+
+
 
         [Test]
         public void GetOrAddAsyncACancelledTaskDoesNotCacheIt()
@@ -313,6 +324,15 @@ namespace LazyCache.UnitTests
             var actual = await sut.GetAsync<ComplexTestObject>(TestKey);
             Assert.IsNotNull(actual);
             Assert.That(actual, Is.EqualTo(testObject));
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncAndThenGetOrAddAsyncDifferentTypeDoesLastInWins()
+        {
+            var first = await sut.GetOrAddAsync(TestKey, () => Task.FromResult(new object()));
+            var second = await sut.GetOrAddAsync(TestKey, () => Task.FromResult(testObject));
+            Assert.IsNotNull(second);
+            Assert.IsInstanceOf<ComplexTestObject>(second);
         }
 
         [Test]
