@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,12 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LazyCache.Ninject\LazyCache.Ninject.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Ninject">
-      <HintPath>C:\Users\Alastair\.nuget\packages\ninject\3.3.4\lib\netstandard2.0\Ninject.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

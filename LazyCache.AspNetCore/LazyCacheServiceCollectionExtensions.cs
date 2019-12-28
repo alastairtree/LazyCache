@@ -18,7 +18,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
             services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>());
 
-            services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>());
+            services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>(serviceProvider => 
+                new CachingService(
+                    new Lazy<ICacheProvider>(serviceProvider.GetRequiredService<ICacheProvider>))));
 
             return services;
         }
