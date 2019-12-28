@@ -6,7 +6,7 @@ namespace Console.Net461
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             //check one - basic LazyCache
             IAppCache cache = new CachingService(CachingService.DefaultCacheProvider);
