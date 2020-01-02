@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -774,6 +775,34 @@ namespace LazyCache.UnitTests
             Assert.NotNull(sut.Get<object>(TestKey));
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
+        }
+
+        [Test]
+        public void RemovedItemWithCompositeKeyCannotBeRetrievedFromCache()
+        {
+            var internalTestKey1 = TestKey + ".1";
+            var internalTestKey2 = TestKey + ".2";
+            var internalTestKey3 = "1." + TestKey;
+
+            IEnumerable<string> CompositeKeyTest(IEnumerable<string> keys)
+            {
+                return keys.Where(a => a.StartsWith(TestKey));
+            }
+
+            sut.Add(internalTestKey1, new object());
+            sut.Add(internalTestKey2, new object());
+            sut.Add(internalTestKey3, new object());
+            Assert.NotNull(sut.Get<object>(internalTestKey1));
+            Assert.NotNull(sut.Get<object>(internalTestKey2));
+            Assert.NotNull(sut.Get<object>(internalTestKey3));
+
+            sut.Remove(CompositeKeyTest);
+            Assert.Null(sut.Get<object>(internalTestKey1));
+            Assert.Null(sut.Get<object>(internalTestKey2));
+            Assert.NotNull(sut.Get<object>(internalTestKey3));
+
+            sut.Remove(internalTestKey3);
+            Assert.Null(sut.Get<object>(internalTestKey3));
         }
     }
 }

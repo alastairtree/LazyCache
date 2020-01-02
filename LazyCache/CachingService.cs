@@ -142,6 +142,13 @@ namespace LazyCache
             CacheProvider.Remove(key);
         }
 
+        public virtual void Remove(Func<IEnumerable<string>, IEnumerable<string>> keyPredicate)
+        {
+            if (keyPredicate == null)
+                throw new ArgumentNullException(nameof(keyPredicate));
+            CacheProvider.Remove(keyPredicate);
+        }
+
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
 
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
