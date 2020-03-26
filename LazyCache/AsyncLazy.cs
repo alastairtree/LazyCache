@@ -16,7 +16,10 @@ namespace LazyCache
         }
 
         public AsyncLazy(Func<Task<T>> taskFactory) :
-            base(() => Task.Factory.StartNew(taskFactory).Unwrap())
+            base(() => Task.Factory.StartNew(currentContext => {
+                System.Web.HttpContext.Current = (System.Web.HttpContext) currentContext;
+                return taskFactory();
+            }, System.Web.HttpContext.Current).Unwrap())
         {
         }
 
