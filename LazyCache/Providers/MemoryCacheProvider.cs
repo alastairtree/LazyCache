@@ -37,6 +37,7 @@ namespace LazyCache.Providers
 
         public void RemoveAll()
         {
+            cache?.Dispose();
             cache = cacheFactory();
         }
 
