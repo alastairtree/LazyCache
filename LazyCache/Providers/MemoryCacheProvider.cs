@@ -37,8 +37,8 @@ namespace LazyCache.Providers
 
         public void RemoveAll()
         {
-            cache?.Dispose();
-            cache = cacheFactory();
+            var oldCache = System.Threading.Interlocked.Exchange(ref cache, cacheFactory());
+            oldCache?.Dispose();
         }
 
         public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> factory)
