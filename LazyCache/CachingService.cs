@@ -10,7 +10,7 @@ namespace LazyCache
     // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class CachingService : IAppCache
     {
-        private readonly Lazy<ICacheProvider> cacheProvider;
+        private Lazy<ICacheProvider> cacheProvider;
 
         private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
 
@@ -140,6 +140,13 @@ namespace LazyCache
         {
             ValidateKey(key);
             CacheProvider.Remove(key);
+        }
+        
+        public virtual void RemoveAll()
+        {
+            CacheProvider.Dispose();
+            cacheProvider = new Lazy<ICacheProvider>(() => 
+                new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
         }
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
