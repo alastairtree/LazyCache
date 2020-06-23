@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache", "LazyCache\LazyCache.csproj", "{E6A1EF20-94AD-4A1C-9A89-3B2FA8AD8EC7}"
 EndProject
@@ -25,7 +25,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console.Net461", "Console.N
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.Ninject", "LazyCache.Ninject\LazyCache.Ninject.csproj", "{6FF349C3-D20C-493C-87A3-5A193538FE13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache.Ninject.UnitTests", "LazyCache.Ninject.UnitTests\LazyCache.Ninject.UnitTests.csproj", "{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.Ninject.UnitTests", "LazyCache.Ninject.UnitTests\LazyCache.Ninject.UnitTests.csproj", "{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore21", "LazyCache.UnitTestsCore21\LazyCache.UnitTestsCore21.csproj", "{A9092A92-0EA4-42DE-9522-8F86BA1E603E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore22", "LazyCache.UnitTestsCore22\LazyCache.UnitTestsCore22.csproj", "{69E47208-10AA-471D-AC26-AA95FF9EEA2D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore30", "LazyCache.UnitTestsCore30\LazyCache.UnitTestsCore30.csproj", "{8E1FEC4E-BE54-48AE-8C87-8A718BE1E3E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore31", "LazyCache.UnitTestsCore31\LazyCache.UnitTestsCore31.csproj", "{2E025606-884D-4C48-8490-99EB1EA7B268}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +69,22 @@ Global
 		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05FDA7C8-42B4-4B07-B148-EC5EFB98055B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9092A92-0EA4-42DE-9522-8F86BA1E603E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9092A92-0EA4-42DE-9522-8F86BA1E603E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9092A92-0EA4-42DE-9522-8F86BA1E603E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9092A92-0EA4-42DE-9522-8F86BA1E603E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E47208-10AA-471D-AC26-AA95FF9EEA2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E47208-10AA-471D-AC26-AA95FF9EEA2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E47208-10AA-471D-AC26-AA95FF9EEA2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E47208-10AA-471D-AC26-AA95FF9EEA2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E1FEC4E-BE54-48AE-8C87-8A718BE1E3E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E1FEC4E-BE54-48AE-8C87-8A718BE1E3E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E1FEC4E-BE54-48AE-8C87-8A718BE1E3E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E1FEC4E-BE54-48AE-8C87-8A718BE1E3E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E025606-884D-4C48-8490-99EB1EA7B268}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E025606-884D-4C48-8490-99EB1EA7B268}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E025606-884D-4C48-8490-99EB1EA7B268}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E025606-884D-4C48-8490-99EB1EA7B268}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

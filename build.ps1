@@ -37,7 +37,7 @@ Try {
 
 	# Find each test project and run tests. upload results to AppVeyor
 	Get-ChildItem .\**\*.csproj -Recurse | 
-		Where-Object { $_.Name -match ".*Test(s)?.csproj$"} | 
+		Where-Object { $_.Name -match ".*Test.*\.csproj$"} | 
 		ForEach-Object { 
 		
 			Exec { dotnet test $_.FullName --configuration $config --no-build --no-restore --logger:"trx;LogFileName=..\..\test-result.trx" }

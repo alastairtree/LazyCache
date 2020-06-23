@@ -71,7 +71,7 @@ namespace LazyCache
 
             var item = CacheProvider.Get(key);
 
-            return GetValueFromLazy<T>(item);
+            return GetValueFromLazy<T>(item, out _);
         }
 
         public virtual Task<T> GetAsync<T>(string key)
@@ -80,7 +80,7 @@ namespace LazyCache
 
             var item = CacheProvider.Get(key);
 
-            return GetValueFromAsyncLazy<T>(item);
+            return GetValueFromAsyncLazy<T>(item, out _);
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
@@ -88,6 +88,15 @@ namespace LazyCache
             ValidateKey(key);
 
             object cacheItem;
+
+            object CacheFactory(ICacheEntry entry) =>
+                new Lazy<T>(() =>
+                {
+                    var result = addItemFactory(entry);
+                    EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                    return result;
+                });
+
             locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
             try
             {
@@ -108,7 +117,25 @@ namespace LazyCache
 
             try
             {
-                return GetValueFromLazy<T>(cacheItem);
+                var result =  GetValueFromLazy<T>(cacheItem, out var valueHasChangedType);
+
+                // if we get a cache hit but for something with the wrong type we need to evict it, start again and cache the new item instead
+                if (valueHasChangedType)
+                {
+                    CacheProvider.Remove(key);
+                    locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
+                    try
+                    {
+                        cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                    }
+                    finally
+                    {
+                        locker.Release();
+                    }
+                    result = GetValueFromLazy<T>(cacheItem, out _ /* we just evicted so type change cannot happen this time */);
+                }
+
+                return result;
             }
             catch //addItemFactory errored so do not cache the exception
             {
@@ -148,6 +175,15 @@ namespace LazyCache
             await locker.WaitAsync()
                 .ConfigureAwait(
                     false); //TODO: do we really need to lock everything here - faster if we could lock on just the key?
+
+            object CacheFactory(ICacheEntry entry) =>
+                new AsyncLazy<T>(() =>
+                {
+                    var result = addItemFactory(entry);
+                    EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                    return result;
+                });
+
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
@@ -167,7 +203,26 @@ namespace LazyCache
 
             try
             {
-                var result = GetValueFromAsyncLazy<T>(cacheItem);
+                var result = GetValueFromAsyncLazy<T>(cacheItem, out var valueHasChangedType);
+
+                // if we get a cache hit but for something with the wrong type we need to evict it, start again and cache the new item instead
+                if (valueHasChangedType)
+                {
+                    CacheProvider.Remove(key);
+                    await locker.WaitAsync()
+                        .ConfigureAwait(
+                            false); //TODO: do we really need to lock everything here - faster if we could lock on just the key?
+                    try
+                    {
+                        cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                    }
+                    finally
+                    {
+                        locker.Release();
+                    }
+                    result = GetValueFromAsyncLazy<T>(cacheItem, out _ /* we just evicted so type change cannot happen this time */);
+                }
+
 
                 if (result.IsCanceled || result.IsFaulted)
                     CacheProvider.Remove(key);
@@ -181,8 +236,9 @@ namespace LazyCache
             }
         }
 
-        protected virtual T GetValueFromLazy<T>(object item)
+        protected virtual T GetValueFromLazy<T>(object item, out bool valueHasChangedType)
         {
+            valueHasChangedType = false;
             switch (item)
             {
                 case Lazy<T> lazy:
@@ -198,11 +254,21 @@ namespace LazyCache
                     return task.Result;
             }
 
+            // if they have cached something else with the same key we need to tell caller to reset the cached item
+            // although this is probably not the fastest this should not get called on the main use case
+            // where you just hit the first switch case above. 
+            var itemsType = item?.GetType();
+            if (itemsType != null && itemsType.IsGenericType && itemsType.GetGenericTypeDefinition() == typeof(Lazy<>))
+            {
+                valueHasChangedType = true;
+            }
+
             return default(T);
         }
 
-        protected virtual Task<T> GetValueFromAsyncLazy<T>(object item)
+        protected virtual Task<T> GetValueFromAsyncLazy<T>(object item, out bool valueHasChangedType)
         {
+            valueHasChangedType = false; 
             switch (item)
             {
                 case AsyncLazy<T> asyncLazy:
@@ -214,6 +280,15 @@ namespace LazyCache
                     return Task.FromResult(lazy.Value);
                 case T variable:
                     return Task.FromResult(variable);
+            }
+
+            // if they have cached something else with the same key we need to tell caller to reset the cached item
+            // although this is probably not the fastest this should not get called on the main use case
+            // where you just hit the first switch case above. 
+            var itemsType = item?.GetType();
+            if (itemsType != null && itemsType.IsGenericType && itemsType.GetGenericTypeDefinition() == typeof(AsyncLazy<>))
+            {
+                valueHasChangedType = true;
             }
 
             return Task.FromResult(default(T));

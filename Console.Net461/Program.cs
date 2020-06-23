@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LazyCache;
 using Ninject;
 
@@ -10,7 +6,7 @@ namespace Console.Net461
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             //check one - basic LazyCache
             IAppCache cache = new CachingService(CachingService.DefaultCacheProvider);

@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -13,7 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LazyCache\LazyCache.csproj" />
+    <ProjectReference Include="..\LazyCache.AspNetCore\LazyCache.AspNetCore.csproj" />
     <ProjectReference Include="..\LazyCache.Ninject\LazyCache.Ninject.csproj" />
+    <PackageReference Include="microsoft.extensions.caching.abstractions" Version="3.0.1" />
+    <PackageReference Include="microsoft.extensions.caching.memory" Version="3.0.1" />
   </ItemGroup>
 
 </Project>
