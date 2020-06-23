@@ -93,6 +93,7 @@ namespace LazyCache
                 new Lazy<T>(() =>
                 {
                     var result = addItemFactory(entry);
+                    SetAbsoluteExpirationFromRelative(entry);
                     EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
                     return result;
                 });
@@ -100,15 +101,7 @@ namespace LazyCache
             locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
             try
             {
-                cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
-                    new Lazy<T>(() =>
-                    {
-                        var result = addItemFactory(entry);
-                        SetAbsoluteExpirationFromRelative(entry);
-                        EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
-                        return result;
-                    })
-                );
+                cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
             }
             finally
             {
@@ -180,21 +173,14 @@ namespace LazyCache
                 new AsyncLazy<T>(() =>
                 {
                     var result = addItemFactory(entry);
+                    SetAbsoluteExpirationFromRelative(entry);
                     EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
                     return result;
                 });
 
             try
             {
-                cacheItem = CacheProvider.GetOrCreate<object>(key, entry =>
-                    new AsyncLazy<T>(() =>
-                    {
-                        var result = addItemFactory(entry);
-                        SetAbsoluteExpirationFromRelative(entry);
-                        EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
-                        return result;
-                    })
-                );
+                cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
             }
             finally
             {
