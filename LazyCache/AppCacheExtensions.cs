@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace LazyCache
 {
@@ -41,6 +43,21 @@ namespace LazyCache
             return cache.GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
         }
 
+        public static T GetOrAdd<T>(this IAppCache cache, string key, Func<T> addItemFactory, DateTimeOffset expires, ExpirationMode mode)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+
+            switch (mode)
+            {
+                case ExpirationMode.LazyExpiration:
+                    return cache.GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions { AbsoluteExpiration = expires });
+                case ExpirationMode.ImmediateExpiration:
+                    return cache.GetOrAdd(key, addItemFactory, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(expires));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+        }
+
         public static T GetOrAdd<T>(this IAppCache cache, string key, Func<T> addItemFactory,
             TimeSpan slidingExpiration)
         {
@@ -53,11 +70,7 @@ namespace LazyCache
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache));
 
-            return cache.GetOrAdd(key, entry =>
-            {
-                entry.SetOptions(policy);
-                return addItemFactory();
-            });
+            return cache.GetOrAdd(key, _=> addItemFactory(), policy);
         }
 
         public static Task<T> GetOrAddAsync<T>(this IAppCache cache, string key, Func<Task<T>> addItemFactory)
@@ -67,13 +80,28 @@ namespace LazyCache
             return cache.GetOrAddAsync(key, addItemFactory, cache.DefaultCachePolicy.BuildOptions());
         }
 
-
         public static Task<T> GetOrAddAsync<T>(this IAppCache cache, string key, Func<Task<T>> addItemFactory,
             DateTimeOffset expires)
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache));
 
             return cache.GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
+        }
+
+        public static Task<T> GetOrAddAsync<T>(this IAppCache cache, string key, Func<Task<T>> addItemFactory,
+            DateTimeOffset expires, ExpirationMode mode)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+
+            switch (mode)
+            {
+                case ExpirationMode.LazyExpiration:
+                    return cache.GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions { AbsoluteExpiration = expires });
+                case ExpirationMode.ImmediateExpiration:
+                    return cache.GetOrAddAsync(key, addItemFactory, new LazyCacheEntryOptions().SetAbsoluteExpiration(expires,mode));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
         }
 
         public static Task<T> GetOrAddAsync<T>(this IAppCache cache, string key, Func<Task<T>> addItemFactory,
@@ -90,11 +118,7 @@ namespace LazyCache
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache));
 
-            return cache.GetOrAddAsync(key, entry =>
-            {
-                entry.SetOptions(policy);
-                return addItemFactory();
-            });
+            return cache.GetOrAddAsync(key, _=> addItemFactory(), policy);
         }
     }
 }

@@ -877,6 +877,85 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddWithCancellationExpiryBasedOnTimerAndCallbackInTheDelegateDoesExpireItemsAndFireTheCallback()
+        {
+            var millisecondsCacheDuration = 100;
+            var callbackHasFired = false;
+            var tokenSource = new CancellationTokenSource(millisecondsCacheDuration);
+            var expireToken = new CancellationChangeToken(tokenSource.Token);
+            var validResult = sut.GetOrAdd(
+                TestKey,
+            entry =>
+            {
+                entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
+                return new ComplexTestObject();
+            }, new MemoryCacheEntryOptions()
+                    .AddExpirationToken(expireToken));
+            // trigger expiry
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(callbackHasFired, Is.True);
+        }
+
+        [Test]
+        public void GetOrAddWithImmediateExpirationAndCallbackInTheDelegateDoesExpireItemsAndFireTheCallback()
+        {
+            var millisecondsCacheDuration = 100;
+            var callbackHasFired = false;
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                entry =>
+                {
+                    entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
+                    return new ComplexTestObject();
+                }, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration)));
+            // trigger expiry
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(callbackHasFired, Is.True);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithImmediateExpirationAndCallbackInTheDelegateDoesExpireItemsAndFireTheCallback()
+        {
+            var millisecondsCacheDuration = 100;
+            var callbackHasFired = false;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                entry =>
+                {
+                    entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
+                    return Task.FromResult(new ComplexTestObject());
+                }, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration)));
+            // trigger expiry
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(callbackHasFired, Is.True);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithImmediateExpirationDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                () =>
+                {
+                    return Task.FromResult(new ComplexTestObject());
+                }, DateTimeOffset.UtcNow.AddMilliseconds(millisecondsCacheDuration), ExpirationMode.ImmediateExpiration);
+            // trigger expiry
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+
+            var actual = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(actual, Is.Null);
+        }
+
+        [Test]
         public void GetOrAddWithPolicyAndThenGetObjectReturnsCorrectType()
         {
             sut.GetOrAdd(TestKey, () => testObject,

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace LazyCache.Providers
 {
@@ -26,6 +28,44 @@ namespace LazyCache.Providers
         public object GetOrCreate<T>(string key, Func<ICacheEntry, T> factory)
         {
             return cache.GetOrCreate(key, factory);
+        }
+
+        public object GetOrCreate<T>(string key, MemoryCacheEntryOptions policy, Func<ICacheEntry, T> factory)
+        {
+            if(policy == null)
+                return cache.GetOrCreate(key, factory);
+
+            if (!cache.TryGetValue(key, out object result))
+            {
+                var entry = cache.CreateEntry(key);
+                // Set the initial options before the factory is fired so that any callbacks
+                // that need to be wired up are still added.
+                entry.SetOptions(policy);
+
+                if (policy is LazyCacheEntryOptions lazyPolicy && lazyPolicy.ExpirationMode == ExpirationMode.ImmediateExpiration)
+                {
+                    var expiryTokenSource = new CancellationTokenSource();
+                    var expireToken = new CancellationChangeToken(expiryTokenSource.Token);
+                    entry.AddExpirationToken(expireToken);
+                    entry.RegisterPostEvictionCallback((keyPost, value, reason, state) => 
+                        expiryTokenSource.Dispose());
+
+                    result = factory(entry);
+
+                    expiryTokenSource.CancelAfter(lazyPolicy.ImmediateAbsoluteExpirationRelativeToNow);
+                }
+                else
+                {
+                    result = factory(entry);
+                }
+                entry.SetValue(result);
+                // need to manually call dispose instead of having a using
+                // in case the factory passed in throws, in which case we
+                // do not want to add the entry to the cache
+                entry.Dispose();
+            }
+
+            return (T)result;
         }
 
         public void Remove(string key)

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace LazyCache
 {
@@ -85,6 +86,11 @@ namespace LazyCache
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
         {
+            return GetOrAdd(key, addItemFactory, null);
+        }
+
+        public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory, MemoryCacheEntryOptions policy)
+        {
             ValidateKey(key);
 
             object cacheItem;
@@ -101,7 +107,7 @@ namespace LazyCache
             locker.Wait(); //TODO: do we really need this? Could we just lock on the key? like this? https://github.com/zkSNACKs/WalletWasabi/blob/7780db075685d2dc13620e0bcf6cc07578b627c2/WalletWasabi/Extensions/MemoryExtensions.cs
             try
             {
-                cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
             }
             finally
             {
@@ -110,7 +116,7 @@ namespace LazyCache
 
             try
             {
-                var result =  GetValueFromLazy<T>(cacheItem, out var valueHasChangedType);
+                var result = GetValueFromLazy<T>(cacheItem, out var valueHasChangedType);
 
                 // if we get a cache hit but for something with the wrong type we need to evict it, start again and cache the new item instead
                 if (valueHasChangedType)
@@ -156,6 +162,11 @@ namespace LazyCache
 
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
+            return await GetOrAddAsync(key, addItemFactory, null);
+        }
+        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory,
+            MemoryCacheEntryOptions policy)
+        { 
             ValidateKey(key);
 
             object cacheItem;
@@ -180,7 +191,7 @@ namespace LazyCache
 
             try
             {
-                cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
             }
             finally
             {

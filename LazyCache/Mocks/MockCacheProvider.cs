@@ -20,6 +20,11 @@ namespace LazyCache.Mocks
             return func(null);
         }
 
+        public object GetOrCreate<T>(string key, MemoryCacheEntryOptions policy, Func<ICacheEntry, T> func)
+        {
+            return func(null);
+        }
+
         public void Remove(string key)
         {
         }
