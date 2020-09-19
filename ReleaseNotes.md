@@ -1,5 +1,12 @@
 # Release notes for LazyCache #
 
+## Version 2.1.0
+- Add options for expiration: 
+    - ExpirationMode.ImmediateExpiration which uses a timer to remove items from the cache as soon as they expire (more resource intensive)
+    - ExpirationMode.LazyExpiration (existing default) which removes expired cache items when they are next accessed if they have expired.
+- Fix #96 AddExpirationToken with CancellationChangeToken is not being honored
+- Allow callers to pass MemoryCacheEntryOptions that is used at cache insertion time. This allows users to wire up callbacks and expiration tokens that fire at the correct time
+
 ## Version 2.0.5
 - Fix #85 and #100 Absolute expiration not working with TimeSpan. Thank you to @Meberem and @Sinhk.
 - Fix #124 casing for PackageReference - by @jnyrup 

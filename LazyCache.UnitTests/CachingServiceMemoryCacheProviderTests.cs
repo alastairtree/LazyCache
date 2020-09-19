@@ -857,7 +857,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAsyncWithCancellationExpiryBasedOnTimerInTheDelegateDoesExpireItems()
         {
-            var millisecondsCacheDuration = 100;
+            var millisecondsCacheDuration = 200;
             var tokenSource = new CancellationTokenSource(millisecondsCacheDuration);
             var expireToken = new CancellationChangeToken(tokenSource.Token);
             var validResult = await sut.GetOrAddAsync(
@@ -869,7 +869,8 @@ namespace LazyCache.UnitTests
                 }
             );
             // trigger expiry
-            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 100));
+
             var expiredResult = sut.Get<ComplexTestObject>(TestKey);
 
             Assert.That(validResult, Is.Not.Null);
