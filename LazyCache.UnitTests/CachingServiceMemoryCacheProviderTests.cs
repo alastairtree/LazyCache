@@ -800,10 +800,10 @@ namespace LazyCache.UnitTests
                 TestKey,
             entry =>
             {
-                entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
                 return new ComplexTestObject();
             }, new MemoryCacheEntryOptions()
-                    .AddExpirationToken(expireToken));
+                    .AddExpirationToken(expireToken)
+                    .RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true));
             // trigger expiry
             Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
 
@@ -820,9 +820,10 @@ namespace LazyCache.UnitTests
                 TestKey,
                 entry =>
                 {
-                    entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
                     return new ComplexTestObject();
-                }, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration)));
+                }, LazyCacheEntryOptions
+                    .WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration))
+                    .RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true));
             // trigger expiry
             Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
 
@@ -839,9 +840,10 @@ namespace LazyCache.UnitTests
                 TestKey,
                 entry =>
                 {
-                    entry.RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true);
                     return Task.FromResult(new ComplexTestObject());
-                }, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration)));
+                }, LazyCacheEntryOptions
+                    .WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration))
+                    .RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true));
             // trigger expiry
             Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
 
