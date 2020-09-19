@@ -1,5 +1,9 @@
 # Release notes for LazyCache #
 
+## Version 2.0.5
+- Fix #85 and #100 Absolute expiration not working with TimeSpan. Thank you to @Meberem and @Sinhk.
+- Fix #124 casing for PackageReference - by @jnyrup 
+
 ## Version 2.0.4
 - Fix #82 Make constructor resolution  specific when using aspnet core dependency injection
 
