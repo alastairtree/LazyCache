@@ -834,7 +834,7 @@ namespace LazyCache.UnitTests
         [Test]
         public async Task GetOrAddAsyncWithImmediateExpirationAndCallbackInTheDelegateDoesExpireItemsAndFireTheCallback()
         {
-            var millisecondsCacheDuration = 100;
+            var millisecondsCacheDuration = 1000;
             var callbackHasFired = false;
             var validResult = await sut.GetOrAddAsync(
                 TestKey,
@@ -845,7 +845,7 @@ namespace LazyCache.UnitTests
                     .WithImmediateAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration))
                     .RegisterPostEvictionCallback((key, value, reason, state) => callbackHasFired = true));
             // trigger expiry
-            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 1000));
 
             Assert.That(validResult, Is.Not.Null);
             Assert.That(callbackHasFired, Is.True);
