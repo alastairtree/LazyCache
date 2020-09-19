@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using NUnit.Framework;
 
 namespace LazyCache.UnitTests
@@ -781,6 +782,93 @@ namespace LazyCache.UnitTests
                 }
             );
             // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddWithCancellationExpiryInTheDelegateDoesExpireItems()
+        {
+            var tokenSource = new CancellationTokenSource();
+            var expireToken = new CancellationChangeToken(tokenSource.Token);
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                entry =>
+                {
+                    entry.AddExpirationToken(expireToken);
+                    return new ComplexTestObject();
+                }
+            );
+            // trigger expiry
+            tokenSource.Cancel();
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithCancellationExpiryInTheDelegateDoesExpireItems()
+        {
+            var tokenSource = new CancellationTokenSource();
+            var expireToken = new CancellationChangeToken(tokenSource.Token);
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                entry =>
+                {
+                    entry.AddExpirationToken(expireToken);
+                    return Task.FromResult(new ComplexTestObject());
+                }
+            );
+            // trigger expiry
+            tokenSource.Cancel();
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddWithCancellationExpiryBasedOnTimerInTheDelegateDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var tokenSource = new CancellationTokenSource(millisecondsCacheDuration);
+            var expireToken = new CancellationChangeToken(tokenSource.Token);
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                entry =>
+                {
+                    entry.AddExpirationToken(expireToken);
+                    return new ComplexTestObject();
+                }
+            );
+            // trigger expiry
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithCancellationExpiryBasedOnTimerInTheDelegateDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var tokenSource = new CancellationTokenSource(millisecondsCacheDuration);
+            var expireToken = new CancellationChangeToken(tokenSource.Token);
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                entry =>
+                {
+                    entry.AddExpirationToken(expireToken);
+                    return Task.FromResult(new ComplexTestObject());
+                }
+            );
+            // trigger expiry
             Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
             var expiredResult = sut.Get<ComplexTestObject>(TestKey);
 

@@ -98,7 +98,7 @@ namespace LazyCache
                     return result;
                 });
 
-            locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
+            locker.Wait(); //TODO: do we really need this? Could we just lock on the key? like this? https://github.com/zkSNACKs/WalletWasabi/blob/7780db075685d2dc13620e0bcf6cc07578b627c2/WalletWasabi/Extensions/MemoryExtensions.cs
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
