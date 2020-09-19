@@ -641,6 +641,154 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddWithAbsoluteOffsetExpiryAsDateTimeOffsetDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                () => new ComplexTestObject(),
+                DateTimeOffset.Now.AddMilliseconds(millisecondsCacheDuration)
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddWithAbsoluteOffsetExpiryAsTimeSpanDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                () => new ComplexTestObject(),
+                TimeSpan.FromMilliseconds(millisecondsCacheDuration)
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddWithAbsoluteOffsetExpiryInTheDelegateDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                entry =>
+                {
+                    entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddMilliseconds(millisecondsCacheDuration));
+                    return new ComplexTestObject();
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public void GetOrAddWithAbsoluteOffsetExpiryInTheDelegateUsingTimeSpanDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = sut.GetOrAdd(
+                TestKey,
+                entry =>
+                {
+                    entry.SetAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration));
+                    return new ComplexTestObject();
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryAsDateTimeOffsetDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                () => Task.FromResult(new ComplexTestObject()),
+                DateTimeOffset.Now.AddMilliseconds(millisecondsCacheDuration)
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryAsTimeSpanDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                () => Task.FromResult(new ComplexTestObject()),
+                TimeSpan.FromMilliseconds(millisecondsCacheDuration)
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                entry =>
+                {
+                    entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddMilliseconds(millisecondsCacheDuration));
+                    return Task.FromResult(new ComplexTestObject());
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateUsingTimeSpanDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                entry =>
+                {
+                    entry.SetAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration));
+                    return Task.FromResult(new ComplexTestObject());
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
         public void GetOrAddWithPolicyAndThenGetObjectReturnsCorrectType()
         {
             sut.GetOrAdd(TestKey, () => testObject,
