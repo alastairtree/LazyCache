@@ -852,6 +852,45 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public async Task AutoRefresh()
+        {
+            var key = "someKey";
+            var refreshInterval = TimeSpan.FromSeconds(1);
+            var timesGenerated = 0;
+
+            // this is the Func what we are caching 
+            ComplexTestObject GetStuff()
+            {
+                timesGenerated++;
+                return new ComplexTestObject();
+            }
+
+            // this sets up options that will recreate the entry on eviction
+            MemoryCacheEntryOptions GetOptions()
+            {
+                var options = new LazyCacheEntryOptions()
+                    .SetAbsoluteExpiration(refreshInterval, ExpirationMode.ImmediateExpiration);
+                options.RegisterPostEvictionCallback((keyEvicted, value, reason, state) =>
+                {
+                    if (reason == EvictionReason.Expired  || reason == EvictionReason.TokenExpired)
+                        sut.GetOrAdd(key, _ => GetStuff(), GetOptions());
+                });
+                return options;
+            }
+
+            for (var i = 0; i < 3; i++)
+            {
+                var thing = sut.GetOrAdd(key, () => GetStuff(), GetOptions());
+                Assert.That(thing, Is.Not.Null);
+                await Task.Delay(2 * refreshInterval);
+            }
+
+            // refreshed every second in 6 seconds so generated 6 times
+            // even though we only fetched it every other second which would be 3 times
+            Assert.That(timesGenerated, Is.EqualTo(6));
+        }
+
+        [Test]
         public async Task GetOrAddAsyncWithImmediateExpirationDoesExpireItems()
         {
             var millisecondsCacheDuration = 100;
