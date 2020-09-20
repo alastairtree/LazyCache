@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 // ReSharper disable once CheckNamespace - MS guidelines say put DI registration in this NS
 namespace Microsoft.Extensions.DependencyInjection
 {
-    // See https://github.com/aspnet/Caching/blob/dev/src/Microsoft.Extensions.Caching.Memory/MemoryCacheServiceCollectionExtensions.cs
+    // See https://github.com/dotnet/runtime/blob/master/src/libraries/Microsoft.Extensions.Caching.Memory/src/MemoryCacheServiceCollectionExtensions.cs
     public static class LazyCacheServiceCollectionExtensions
     {
         public static IServiceCollection AddLazyCache(this IServiceCollection services)
