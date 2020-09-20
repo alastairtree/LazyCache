@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -908,6 +909,69 @@ namespace LazyCache.UnitTests
             Assert.That(validResult, Is.Not.Null);
             Assert.That(actual, Is.Null);
         }
+
+        [Test]
+        [Ignore("Not a real unit tests - just used for hammering the cache")]
+        public async Task PerfTest()
+        {
+            var watch = new Stopwatch();
+            watch.Start();
+            var asyncThreads = 10;
+            var syncThreads = 10;
+            var uniqueCacheItems = 20;
+            int cacheMiss = 0;
+            int hits = 0;
+            var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            async Task<ComplexTestObject> GetStuffAsync()
+            {
+                await Task.Delay(25);
+                Interlocked.Increment(ref cacheMiss);
+                return new ComplexTestObject();
+            }
+
+            ComplexTestObject GetStuff()
+            {
+                Thread.Sleep(25);
+                Interlocked.Increment(ref cacheMiss);
+                return new ComplexTestObject();
+            }
+
+
+            var asyncActions = Task.Run(() =>
+            {
+                Parallel.For(1, asyncThreads, async i =>
+                {
+                    while (!cancel.IsCancellationRequested)
+                    {
+                        var key = $"stuff-{hits % uniqueCacheItems}";
+                        var cached = await sut.GetOrAddAsync(key, () => GetStuffAsync(), DateTimeOffset.UtcNow.AddSeconds(1));
+                        if(!cancel.IsCancellationRequested) Interlocked.Increment(ref hits);
+                    }
+                });
+            });
+
+            var syncActions = Task.Run(() =>
+            {
+                Parallel.For(1, syncThreads, i =>
+                {
+                    while (!cancel.IsCancellationRequested)
+                    {
+                        var key = $"stuff-{hits % uniqueCacheItems}";
+                        var cached = sut.GetOrAdd(key, () => GetStuff(), DateTimeOffset.UtcNow.AddSeconds(1));
+                        if (!cancel.IsCancellationRequested) Interlocked.Increment(ref hits);
+                    }
+                });
+            });
+
+            await Task.WhenAll(asyncActions, syncActions);
+
+            watch.Stop();
+            Console.WriteLine(watch.Elapsed);
+            Console.WriteLine("miss " + cacheMiss);
+            Console.WriteLine("hit " + hits);
+        }
+
 
         [Test]
         public void GetOrAddWithPolicyAndThenGetObjectReturnsCorrectType()

@@ -13,7 +13,7 @@ namespace LazyCache
     {
         private readonly Lazy<ICacheProvider> cacheProvider;
 
-        private readonly int[] keyLocks = new int[8192];
+        private readonly int[] keyLocks = new int[32];
 
         public CachingService() : this(DefaultCacheProvider)
         {
