@@ -13,7 +13,7 @@ namespace LazyCache
     {
         private readonly Lazy<ICacheProvider> cacheProvider;
 
-        private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
+        private readonly int[] keyLocks = new int[8192];
 
         public CachingService() : this(DefaultCacheProvider)
         {
@@ -104,14 +104,17 @@ namespace LazyCache
                     return result;
                 });
 
-            locker.Wait(); //TODO: do we really need this? Could we just lock on the key? like this? https://github.com/zkSNACKs/WalletWasabi/blob/7780db075685d2dc13620e0bcf6cc07578b627c2/WalletWasabi/Extensions/MemoryExtensions.cs
+            // acquire lock per key
+            uint hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
+            while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
+            
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
             }
             finally
             {
-                locker.Release();
+                keyLocks[hash] = 0;
             }
 
             try
@@ -122,14 +125,18 @@ namespace LazyCache
                 if (valueHasChangedType)
                 {
                     CacheProvider.Remove(key);
-                    locker.Wait(); //TODO: do we really need this? Could we just lock on the key?
+
+                    // acquire lock again
+                    hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
+                    while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
+
                     try
                     {
                         cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
                     }
                     finally
                     {
-                        locker.Release();
+                        keyLocks[hash] = 0;
                     }
                     result = GetValueFromLazy<T>(cacheItem, out _ /* we just evicted so type change cannot happen this time */);
                 }
@@ -176,9 +183,9 @@ namespace LazyCache
             // below, and guarded using the async lazy. Here we just ensure only one thread can place 
             // the AsyncLazy into the cache at one time
 
-            await locker.WaitAsync()
-                .ConfigureAwait(
-                    false); //TODO: do we really need to lock everything here - faster if we could lock on just the key?
+            // acquire lock
+            uint hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
+            while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
 
             object CacheFactory(ICacheEntry entry) =>
                 new AsyncLazy<T>(() =>
@@ -195,7 +202,7 @@ namespace LazyCache
             }
             finally
             {
-                locker.Release();
+                keyLocks[hash] = 0;
             }
 
             try
@@ -206,16 +213,18 @@ namespace LazyCache
                 if (valueHasChangedType)
                 {
                     CacheProvider.Remove(key);
-                    await locker.WaitAsync()
-                        .ConfigureAwait(
-                            false); //TODO: do we really need to lock everything here - faster if we could lock on just the key?
+
+                    // acquire lock
+                    hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
+                    while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
+
                     try
                     {
                         cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
                     }
                     finally
                     {
-                        locker.Release();
+                        keyLocks[hash] = 0;
                     }
                     result = GetValueFromAsyncLazy<T>(cacheItem, out _ /* we just evicted so type change cannot happen this time */);
                 }
