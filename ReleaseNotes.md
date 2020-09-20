@@ -1,5 +1,8 @@
 # Release notes for LazyCache #
 
+## Version 2.1.1
+- PR #126 (and issue #104) optimise cache key locking for faster performance under high CPU load and lots of concurrency. Thanks to @jjxtra
+
 ## Version 2.1.0
 - Add options for expiration: 
     - ExpirationMode.ImmediateExpiration which uses a timer to remove items from the cache as soon as they expire (more resource intensive)
