@@ -1,5 +1,8 @@
 # Release notes for LazyCache #
 
+## Version 2.1.2
+- Tweak key lock array size based on CPU count so larger for bigger machines (See PR #126 and discussion with @jjxtra)
+
 ## Version 2.1.1
 - PR #126 (and issue #104) optimise cache key locking for faster performance under high CPU load and lots of concurrency. Thanks to @jjxtra
 
