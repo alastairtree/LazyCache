@@ -13,7 +13,7 @@ namespace LazyCache
     {
         private readonly Lazy<ICacheProvider> cacheProvider;
 
-        private readonly int[] keyLocks = new int[32];
+        private readonly int[] keyLocks;
 
         public CachingService() : this(DefaultCacheProvider)
         {
@@ -22,12 +22,17 @@ namespace LazyCache
         public CachingService(Lazy<ICacheProvider> cacheProvider)
         {
             this.cacheProvider = cacheProvider ?? throw new ArgumentNullException(nameof(cacheProvider));
+            var lockCount = Math.Max(Environment.ProcessorCount * 8, 32);
+            keyLocks = new int[lockCount];
         }
 
         public CachingService(Func<ICacheProvider> cacheProviderFactory)
         {
             if (cacheProviderFactory == null) throw new ArgumentNullException(nameof(cacheProviderFactory));
             cacheProvider = new Lazy<ICacheProvider>(cacheProviderFactory);
+            var lockCount = Math.Max(Environment.ProcessorCount * 8, 32);
+            keyLocks = new int[lockCount];
+
         }
 
         public CachingService(ICacheProvider cache) : this(() => cache)
