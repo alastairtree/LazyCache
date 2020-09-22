@@ -14,7 +14,7 @@ namespace LazyCache
             return new LazyCacheEntryOptions
             {
                 AbsoluteExpiration = absoluteExpiration,
-                ExpirationMode = ExpirationMode.ImmediateExpiration,
+                ExpirationMode = ExpirationMode.ImmediateEviction,
                 ImmediateAbsoluteExpirationRelativeToNow = delay
             };
         }
@@ -24,7 +24,7 @@ namespace LazyCache
             return new LazyCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = absoluteExpiration,
-                ExpirationMode = ExpirationMode.ImmediateExpiration,
+                ExpirationMode = ExpirationMode.ImmediateEviction,
                 ImmediateAbsoluteExpirationRelativeToNow = absoluteExpiration
             };
         }
