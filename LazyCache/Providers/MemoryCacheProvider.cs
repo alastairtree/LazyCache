@@ -35,14 +35,14 @@ namespace LazyCache.Providers
             if(policy == null)
                 return cache.GetOrCreate(key, factory);
 
-            if (!cache.TryGetValue(key, out object result))
+            if (!cache.TryGetValue(key, out var result))
             {
                 var entry = cache.CreateEntry(key);
                 // Set the initial options before the factory is fired so that any callbacks
                 // that need to be wired up are still added.
                 entry.SetOptions(policy);
 
-                if (policy is LazyCacheEntryOptions lazyPolicy && lazyPolicy.ExpirationMode == ExpirationMode.ImmediateExpiration)
+                if (policy is LazyCacheEntryOptions lazyPolicy && lazyPolicy.ExpirationMode != ExpirationMode.LazyExpiration)
                 {
                     var expiryTokenSource = new CancellationTokenSource();
                     var expireToken = new CancellationChangeToken(expiryTokenSource.Token);

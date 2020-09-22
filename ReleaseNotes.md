@@ -1,5 +1,8 @@
 # Release notes for LazyCache #
 
+## Version 2.1.3
+- Rename ExpirationMode.ImmediateExpiry => ExpirationMode.ImmediateEviction
+
 ## Version 2.1.2
 - Tweak key lock array size based on CPU count so larger for bigger machines (See PR #126 and discussion with @jjxtra)
 

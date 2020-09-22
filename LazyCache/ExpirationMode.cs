@@ -1,4 +1,7 @@
-﻿namespace LazyCache
+﻿using System;
+using System.Diagnostics;
+
+namespace LazyCache
 {
     public enum ExpirationMode
     {
@@ -15,6 +18,14 @@
         ///     This will then trigger PostEvictionCallbacks at the expected time. This uses more resources
         ///     than LazyExpiration.
         /// </summary>
-        ImmediateExpiration
+        [Obsolete("Use ExpirationMode.ImmediateEviction instead - this name is miss-leading")]
+        ImmediateExpiration,
+
+        /// <summary>
+        ///     Use a timer to force eviction of expired items from the cache as soon as they expire.
+        ///     This will then trigger PostEvictionCallbacks at the expected time. This uses more resources
+        ///     than LazyExpiration.
+        /// </summary>
+        ImmediateEviction
     }
 }

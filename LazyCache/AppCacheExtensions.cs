@@ -51,10 +51,8 @@ namespace LazyCache
             {
                 case ExpirationMode.LazyExpiration:
                     return cache.GetOrAdd(key, addItemFactory, new MemoryCacheEntryOptions { AbsoluteExpiration = expires });
-                case ExpirationMode.ImmediateExpiration:
-                    return cache.GetOrAdd(key, addItemFactory, LazyCacheEntryOptions.WithImmediateAbsoluteExpiration(expires));
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+                    return cache.GetOrAdd(key, addItemFactory, new LazyCacheEntryOptions().SetAbsoluteExpiration(expires, mode));
             }
         }
 
@@ -97,10 +95,8 @@ namespace LazyCache
             {
                 case ExpirationMode.LazyExpiration:
                     return cache.GetOrAddAsync(key, addItemFactory, new MemoryCacheEntryOptions { AbsoluteExpiration = expires });
-                case ExpirationMode.ImmediateExpiration:
-                    return cache.GetOrAddAsync(key, addItemFactory, new LazyCacheEntryOptions().SetAbsoluteExpiration(expires,mode));
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+                    return cache.GetOrAddAsync(key, addItemFactory, new LazyCacheEntryOptions().SetAbsoluteExpiration(expires, mode));
             }
         }
 

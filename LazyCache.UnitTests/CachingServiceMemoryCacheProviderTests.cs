@@ -870,7 +870,7 @@ namespace LazyCache.UnitTests
             MemoryCacheEntryOptions GetOptions()
             {
                 var options = new LazyCacheEntryOptions()
-                    .SetAbsoluteExpiration(refreshInterval, ExpirationMode.ImmediateExpiration);
+                    .SetAbsoluteExpiration(refreshInterval, ExpirationMode.ImmediateEviction);
                 options.RegisterPostEvictionCallback((keyEvicted, value, reason, state) =>
                 {
                     if (reason == EvictionReason.Expired  || reason == EvictionReason.TokenExpired)
@@ -900,7 +900,7 @@ namespace LazyCache.UnitTests
                 () =>
                 {
                     return Task.FromResult(new ComplexTestObject());
-                }, DateTimeOffset.UtcNow.AddMilliseconds(millisecondsCacheDuration), ExpirationMode.ImmediateExpiration);
+                }, DateTimeOffset.UtcNow.AddMilliseconds(millisecondsCacheDuration), ExpirationMode.ImmediateEviction);
             // trigger expiry
             Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
 
