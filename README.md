@@ -1,3 +1,5 @@
+<img align="right" src="https://raw.githubusercontent.com/alastairtree/LazyCache/master/artwork/logo-256.png?raw=true" />
+
 # Lazy Cache #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/oca98pp4safs4vj2/branch/master?svg=true)](https://ci.appveyor.com/project/alastairtree/lazycache/branch/master)
