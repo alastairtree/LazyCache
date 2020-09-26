@@ -172,10 +172,11 @@ namespace LazyCache
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
 
-        public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
+        public virtual Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
-            return await GetOrAddAsync(key, addItemFactory, null);
+            return GetOrAddAsync(key, addItemFactory, null);
         }
+
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory,
             MemoryCacheEntryOptions policy)
         { 
