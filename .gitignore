@@ -190,3 +190,13 @@ $RECYCLE.BIN/
 
 packages/
 .vs/
+
+# Benchmark Dot Net
+**/BenchmarkDotNet.Artifacts/*
+**/project.lock.json
+tests/output/*
+.vs/restore.dg
+artifacts/*
+BDN.Generated
+BenchmarkDotNet.Samples/Properties/launchSettings.json
+src/BenchmarkDotNet/Disassemblers/net461/*
