@@ -3,6 +3,7 @@
 ## Version 2.1.3
 - Rename ExpirationMode.ImmediateExpiry => ExpirationMode.ImmediateEviction
 - Lovely new logo! (#133) Thanks to @doolali
+- Performance imporvements to reduce allocations in #134 - thanks @jnyrup
 
 ## Version 2.1.2
 - Tweak key lock array size based on CPU count so larger for bigger machines (See PR #126 and discussion with @jjxtra)
