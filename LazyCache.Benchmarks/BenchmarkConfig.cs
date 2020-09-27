@@ -4,6 +4,8 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
+using BenchmarkDotNet.Reports;
+using Perfolizer.Horology;
 
 namespace LazyCache.Benchmarks
 {
@@ -14,6 +16,7 @@ namespace LazyCache.Benchmarks
               .AddDiagnoser(MemoryDiagnoser.Default)
               .AddLogger(new ConsoleLogger())
               .AddColumn(TargetMethodColumn.Method)
-              .AddAnalyser(EnvironmentAnalyser.Default);
+              .AddAnalyser(EnvironmentAnalyser.Default)
+              .WithSummaryStyle(SummaryStyle.Default.WithTimeUnit(TimeUnit.Nanosecond));
     }
 }
