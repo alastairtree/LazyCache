@@ -62,13 +62,10 @@ namespace LazyCache
         /// </summary>
         public virtual CacheDefaults DefaultCachePolicy { get; set; } = new CacheDefaults();
 
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
         public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
-            ValidateKey(key);
-
-            CacheProvider.Set(key, item, policy);
+            Set(key, item, policy);
         }
 
         public virtual T Get<T>(string key)
@@ -155,15 +152,6 @@ namespace LazyCache
             }
         }
 
-        private static void SetAbsoluteExpirationFromRelative(ICacheEntry entry)
-        {
-            if (!entry.AbsoluteExpirationRelativeToNow.HasValue) return;
-
-            var absoluteExpiration = DateTimeOffset.UtcNow + entry.AbsoluteExpirationRelativeToNow.Value;
-            if (!entry.AbsoluteExpiration.HasValue || absoluteExpiration < entry.AbsoluteExpiration)
-                entry.AbsoluteExpiration = absoluteExpiration;
-        }
-
         public virtual void Remove(string key)
         {
             ValidateKey(key);
@@ -246,6 +234,15 @@ namespace LazyCache
                 CacheProvider.Remove(key);
                 throw;
             }
+        }
+
+        public virtual void Set<T>(string key, T item, MemoryCacheEntryOptions policy)
+        {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
+            ValidateKey(key);
+
+            CacheProvider.Set(key, item, policy);
         }
 
         protected virtual T GetValueFromLazy<T>(object item, out bool valueHasChangedType)
@@ -334,6 +331,15 @@ namespace LazyCache
 
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentOutOfRangeException(nameof(key), "Cache keys cannot be empty or whitespace");
+        }
+
+        private static void SetAbsoluteExpirationFromRelative(ICacheEntry entry)
+        {
+            if (!entry.AbsoluteExpirationRelativeToNow.HasValue) return;
+
+            var absoluteExpiration = DateTimeOffset.UtcNow + entry.AbsoluteExpirationRelativeToNow.Value;
+            if (!entry.AbsoluteExpiration.HasValue || absoluteExpiration < entry.AbsoluteExpiration)
+                entry.AbsoluteExpiration = absoluteExpiration;
         }
     }
 }

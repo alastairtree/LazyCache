@@ -178,6 +178,137 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void SetComplexObjectThenGetGenericReturnsCachedObject()
+        {
+            testObject.SomeItems.Add("Another");
+            testObject.SomeMessage = "changed-it-up";
+            sut.Set(TestKey, testObject);
+            var actual = sut.Get<ComplexTestObject>(TestKey);
+            var expected = testObject;
+            Assert.NotNull(actual);
+            Assert.AreEqual(expected, actual);
+            testObject.SomeItems.Should().Contain("Another");
+            testObject.SomeMessage.Should().Be("changed-it-up");
+        }
+
+        [Test]
+        public void SetComplexObjectThenGetReturnsCachedObject()
+        {
+            sut.Set(TestKey, testObject);
+            var actual = sut.Get<object>(TestKey) as ComplexTestObject;
+            var expected = testObject;
+            Assert.NotNull(actual);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void SetEmptyKeyThrowsException()
+        {
+            Action act = () => sut.Set("", new object());
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void SetEmptyKeyThrowsExceptionWithExpiration()
+        {
+            Action act = () => sut.Set("", new object(), DateTimeOffset.Now.AddHours(1));
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void SetEmptyKeyThrowsExceptionWithPolicy()
+        {
+            Action act = () => sut.Set("", new object(), new MemoryCacheEntryOptions());
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void SetEmptyKeyThrowsExceptionWithSliding()
+        {
+            Action act = () => sut.Set("", new object(), new TimeSpan(1000));
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void SetNullKeyThrowsException()
+        {
+            Action act = () => sut.Set(null, new object());
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void SetNullKeyThrowsExceptionWithExpiration()
+        {
+            Action act = () => sut.Set(null, new object(), DateTimeOffset.Now.AddHours(1));
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void SetNullKeyThrowsExceptionWithPolicy()
+        {
+            Action act = () => sut.Set(null, new object(), new MemoryCacheEntryOptions());
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void SetNullKeyThrowsExceptionWithSliding()
+        {
+            Action act = () => sut.Set(null, new object(), new TimeSpan(1000));
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void SetNullThrowsException()
+        {
+            Action act = () => sut.Add<object>(TestKey, null);
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void SetThenGetReturnsCachedObject()
+        {
+            sut.Set(TestKey, "testObject");
+            Assert.AreEqual("testObject", sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void SetWithOffsetReturnsCachedItem()
+        {
+            sut.Set(TestKey, "testObject", DateTimeOffset.Now.AddSeconds(1));
+            Assert.AreEqual("testObject", sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void SetWithOffsetThatExpiresReturnsNull()
+        {
+            sut.Set(TestKey, "testObject", DateTimeOffset.Now.AddSeconds(1));
+            Thread.Sleep(1500);
+            Assert.IsNull(sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void SetWithPolicyReturnsCachedItem()
+        {
+            sut.Set(TestKey, "testObject", new MemoryCacheEntryOptions());
+            Assert.AreEqual("testObject", sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void SetWithSlidingReturnsCachedItem()
+        {
+            sut.Set(TestKey, "testObject", new TimeSpan(5000));
+            Assert.AreEqual("testObject", sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void SetWithSlidingThatExpiresReturnsNull()
+        {
+            sut.Set(TestKey, "testObject", new TimeSpan(750));
+            Thread.Sleep(1500);
+            Assert.IsNull(sut.Get<string>(TestKey));
+        }
+
+        [Test]
         public void CacheProviderIsNotNull()
         {
             sut.CacheProvider.Should().NotBeNull();

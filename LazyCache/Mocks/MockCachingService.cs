@@ -48,7 +48,13 @@ namespace LazyCache.Mocks
             return Task.FromResult(default(T));
         }
 
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
         public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
+        {
+            Set(key, item, policy);
+        }
+
+        public void Set<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
         }
     }
