@@ -66,12 +66,18 @@ namespace LazyCache.Benchmarks
 
             // Even though the second and third init attempts are later, this whole operation should still take the time of the first
             var creationTask1 = AddByteArrayToCache(); // initialization attempt, or 200ms
-            var creationTask2 = Task.Delay(50).ContinueWith(async t => await AddByteArrayToCache());
-            var creationTask3 = Task.Delay(150).ContinueWith(async t => await AddByteArrayToCache());
+            var creationTask2 = Delayed(50, AddByteArrayToCache);
+            var creationTask3 = Delayed(50, AddByteArrayToCache);
 
             await Task.WhenAll(creationTask1, creationTask2, creationTask3);
-            //await AddByteArrayToCache();
+
             return cache.Get<byte[]>(CacheKey);
+        }
+
+        private async Task Delayed(int ms, Func<Task> action)
+        {
+            await Task.Delay(ms);
+            await action();
         }
     }
 }
