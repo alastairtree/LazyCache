@@ -87,6 +87,6 @@ namespace LazyCache.Benchmarks
         public async Task<ComplexObject> DotNetMemoryCache_GetOrAddAsync() => await MemCache.GetOrCreateAsync(CacheKey, async entry => await Task.FromResult(ComplexObject));
 
         [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAddAsync))]
-        public async Task<ComplexObject> LazyCache_GetOrAddAsync() => await AppCache.GetOrAddAsync(CacheKey, async entry => await Task.FromResult(ComplexObject));
+        public Task<ComplexObject> LazyCache_GetOrAddAsync() => AppCache.GetOrAddAsync(CacheKey, entry => Task.FromResult(ComplexObject));
     }
 }
