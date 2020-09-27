@@ -41,22 +41,22 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3
 ```
-|                          Method |       Mean |     Error |   StdDev | Ratio |  Gen 0 |  Gen 1 | Gen 2 | Allocated |
-|-------------------------------- |-----------:|----------:|---------:|------:|-------:|-------:|------:|----------:|
-|          DotNetMemoryCache_Init | 1,779.9 ns | 643.50 ns | 35.27 ns |  1.00 | 0.1831 | 0.0916 |     - |    1560 B |
-|                  LazyCache_Init |   447.4 ns |  14.25 ns |  0.78 ns |  0.25 | 0.1020 | 0.0005 |     - |     856 B |
-|                                 |            |           |          |       |        |        |       |           |
-|           DotNetMemoryCache_Set |   486.9 ns |   3.15 ns |  0.17 ns |  1.00 | 0.0496 |      - |     - |     416 B |
-|                   LazyCache_Set |   788.6 ns |  45.65 ns |  2.50 ns |  1.62 | 0.0801 |      - |     - |     672 B |
-|                                 |            |           |          |       |        |        |       |           |
-|           DotNetMemoryCache_Get |   198.6 ns |   3.97 ns |  0.22 ns |  1.00 |      - |      - |     - |         - |
-|                   LazyCache_Get |   231.2 ns |   2.64 ns |  0.14 ns |  1.16 |      - |      - |     - |         - |
-|                                 |            |           |          |       |        |        |       |           |
-|      DotNetMemoryCache_GetOrAdd |   260.8 ns |   9.54 ns |  0.52 ns |  1.00 | 0.0076 |      - |     - |      64 B |
-|              LazyCache_GetOrAdd |   356.8 ns |  23.08 ns |  1.27 ns |  1.37 | 0.0191 |      - |     - |     160 B |
-|                                 |            |           |          |       |        |        |       |           |
-| DotNetMemoryCache_GetOrAddAsync |   371.8 ns |  13.73 ns |  0.75 ns |  1.00 | 0.0334 |      - |     - |     280 B |
-|         LazyCache_GetOrAddAsync |   552.5 ns |  40.98 ns |  2.25 ns |  1.49 | 0.0534 |      - |     - |     448 B |
+|                          Method |       Mean |     Error |   StdDev | Ratio | RatioSD |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
+|-------------------------------- |-----------:|----------:|---------:|------:|--------:|-------:|-------:|-------:|----------:|
+|          DotNetMemoryCache_Init | 1,605.6 ns | 221.54 ns | 12.14 ns |  1.00 |    0.00 | 0.1850 | 0.0916 | 0.0019 |    1560 B |
+|                  LazyCache_Init | 2,843.1 ns | 486.02 ns | 26.64 ns |  1.77 |    0.01 | 0.3090 | 0.1526 |      - |    2600 B |
+|                                 |            |           |          |       |         |        |        |        |           |
+|           DotNetMemoryCache_Set |   483.6 ns |   1.82 ns |  0.10 ns |  1.00 |    0.00 | 0.0496 |      - |      - |     416 B |
+|                   LazyCache_Set |   810.7 ns |   6.21 ns |  0.34 ns |  1.68 |    0.00 | 0.0801 |      - |      - |     672 B |
+|                                 |            |           |          |       |         |        |        |        |           |
+|           DotNetMemoryCache_Get |   197.8 ns |   5.49 ns |  0.30 ns |  1.00 |    0.00 |      - |      - |      - |         - |
+|                   LazyCache_Get |   231.3 ns |   3.25 ns |  0.18 ns |  1.17 |    0.00 |      - |      - |      - |         - |
+|                                 |            |           |          |       |         |        |        |        |           |
+|      DotNetMemoryCache_GetOrAdd |   260.6 ns |  18.44 ns |  1.01 ns |  1.00 |    0.00 | 0.0076 |      - |      - |      64 B |
+|              LazyCache_GetOrAdd |   370.1 ns |  30.55 ns |  1.67 ns |  1.42 |    0.01 | 0.0191 |      - |      - |     160 B |
+|                                 |            |           |          |       |         |        |        |        |           |
+| DotNetMemoryCache_GetOrAddAsync |   375.5 ns |  46.47 ns |  2.55 ns |  1.00 |    0.00 | 0.0334 |      - |      - |     280 B |
+|         LazyCache_GetOrAddAsync |   578.5 ns |  66.25 ns |  3.63 ns |  1.54 |    0.02 | 0.0534 |      - |      - |     448 B |
 
 |                                                 Method |             Mean |           Error |          StdDev |  Gen 0 |  Gen 1 |  Gen 2 |  Allocated |
 |------------------------------------------------------- |-----------------:|----------------:|----------------:|-------:|-------:|-------:|-----------:|

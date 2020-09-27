@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
+using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache.Benchmarks
@@ -37,7 +38,7 @@ namespace LazyCache.Benchmarks
         public MemoryCache DotNetMemoryCache_Init() => new MemoryCache(new MemoryCacheOptions());
 
         [Benchmark, BenchmarkCategory("Init")]
-        public CachingService LazyCache_Init() => new CachingService();
+        public CachingService LazyCache_Init() => new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
 
         /*
          *
