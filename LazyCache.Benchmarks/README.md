@@ -41,22 +41,31 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3
 ```
-|                          Method |       Mean |     Error |   StdDev | Ratio | RatioSD |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
-|-------------------------------- |-----------:|----------:|---------:|------:|--------:|-------:|-------:|-------:|----------:|
-|          DotNetMemoryCache_Init | 1,605.6 ns | 221.54 ns | 12.14 ns |  1.00 |    0.00 | 0.1850 | 0.0916 | 0.0019 |    1560 B |
-|                  LazyCache_Init | 2,843.1 ns | 486.02 ns | 26.64 ns |  1.77 |    0.01 | 0.3090 | 0.1526 |      - |    2600 B |
-|                                 |            |           |          |       |         |        |        |        |           |
-|           DotNetMemoryCache_Set |   483.6 ns |   1.82 ns |  0.10 ns |  1.00 |    0.00 | 0.0496 |      - |      - |     416 B |
-|                   LazyCache_Set |   810.7 ns |   6.21 ns |  0.34 ns |  1.68 |    0.00 | 0.0801 |      - |      - |     672 B |
-|                                 |            |           |          |       |         |        |        |        |           |
-|           DotNetMemoryCache_Get |   197.8 ns |   5.49 ns |  0.30 ns |  1.00 |    0.00 |      - |      - |      - |         - |
-|                   LazyCache_Get |   231.3 ns |   3.25 ns |  0.18 ns |  1.17 |    0.00 |      - |      - |      - |         - |
-|                                 |            |           |          |       |         |        |        |        |           |
-|      DotNetMemoryCache_GetOrAdd |   260.6 ns |  18.44 ns |  1.01 ns |  1.00 |    0.00 | 0.0076 |      - |      - |      64 B |
-|              LazyCache_GetOrAdd |   370.1 ns |  30.55 ns |  1.67 ns |  1.42 |    0.01 | 0.0191 |      - |      - |     160 B |
-|                                 |            |           |          |       |         |        |        |        |           |
-| DotNetMemoryCache_GetOrAddAsync |   375.5 ns |  46.47 ns |  2.55 ns |  1.00 |    0.00 | 0.0334 |      - |      - |     280 B |
-|         LazyCache_GetOrAddAsync |   578.5 ns |  66.25 ns |  3.63 ns |  1.54 |    0.02 | 0.0534 |      - |      - |     448 B |
+|                               Method |       Mean |       Error |   StdDev | Ratio | RatioSD |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
+|------------------------------------- |-----------:|------------:|---------:|------:|--------:|-------:|-------:|-------:|----------:|
+|               DotNetMemoryCache_Init | 1,814.2 ns | 1,080.95 ns | 59.25 ns |  1.00 |    0.00 | 0.1850 | 0.0916 | 0.0019 |    1560 B |
+|                       LazyCache_Init | 3,265.5 ns |   599.75 ns | 32.87 ns |  1.80 |    0.07 | 0.3090 | 0.1526 |      - |    2600 B |
+|                                      |            |             |          |       |         |        |        |        |           |
+|                DotNetMemoryCache_Set |   504.1 ns |    42.38 ns |  2.32 ns |  1.00 |    0.00 | 0.0496 |      - |      - |     416 B |
+|                        LazyCache_Set |   841.6 ns |   172.51 ns |  9.46 ns |  1.67 |    0.02 | 0.0801 |      - |      - |     672 B |
+|                                      |            |             |          |       |         |        |        |        |           |
+|           DotNetMemoryCache_Get_Miss |   201.1 ns |     3.54 ns |  0.19 ns |  1.00 |    0.00 |      - |      - |      - |         - |
+|                   LazyCache_Get_Miss |   241.1 ns |    13.94 ns |  0.76 ns |  1.20 |    0.00 |      - |      - |      - |         - |
+|                                      |            |             |          |       |         |        |        |        |           |
+|            DotNetMemoryCache_Get_Hit |   242.2 ns |    28.93 ns |  1.59 ns |  1.00 |    0.00 |      - |      - |      - |         - |
+|                    LazyCache_Get_Hit |   280.4 ns |    10.45 ns |  0.57 ns |  1.16 |    0.01 |      - |      - |      - |         - |
+|                                      |            |             |          |       |         |        |        |        |           |
+|      DotNetMemoryCache_GetOrAdd_Miss |   269.9 ns |     6.57 ns |  0.36 ns |  1.00 |    0.00 | 0.0076 |      - |      - |      64 B |
+|              LazyCache_GetOrAdd_Miss |   368.5 ns |    60.35 ns |  3.31 ns |  1.37 |    0.01 | 0.0191 |      - |      - |     160 B |
+|                                      |            |             |          |       |         |        |        |        |           |
+|       DotNetMemoryCache_GetOrAdd_Hit |   269.1 ns |     4.48 ns |  0.25 ns |  1.00 |    0.00 | 0.0076 |      - |      - |      64 B |
+|               LazyCache_GetOrAdd_Hit |   377.1 ns |    10.57 ns |  0.58 ns |  1.40 |    0.00 | 0.0191 |      - |      - |     160 B |
+|                                      |            |             |          |       |         |        |        |        |           |
+| DotNetMemoryCache_GetOrAddAsync_Miss |   312.7 ns |    53.05 ns |  2.91 ns |  1.00 |    0.00 | 0.0162 |      - |      - |     136 B |
+|         LazyCache_GetOrAddAsync_Miss |   507.5 ns |    33.96 ns |  1.86 ns |  1.62 |    0.02 | 0.0362 |      - |      - |     304 B |
+|                                      |            |             |          |       |         |        |        |        |           |
+|  DotNetMemoryCache_GetOrAddAsync_Hit |   314.5 ns |    65.34 ns |  3.58 ns |  1.00 |    0.00 | 0.0162 |      - |      - |     136 B |
+|          LazyCache_GetOrAddAsync_Hit |   535.9 ns |    47.83 ns |  2.62 ns |  1.70 |    0.03 | 0.0448 |      - |      - |     376 B |
 
 |                                                 Method |             Mean |           Error |          StdDev |  Gen 0 |  Gen 1 |  Gen 2 |  Allocated |
 |------------------------------------------------------- |-----------------:|----------------:|----------------:|-------:|-------:|-------:|-----------:|

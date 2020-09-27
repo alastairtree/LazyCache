@@ -13,16 +13,24 @@ namespace LazyCache.Benchmarks
         public const string CacheKey = nameof(CacheKey);
 
         public IMemoryCache MemCache;
+        public IMemoryCache PopulatedMemCache;
         public IAppCache AppCache;
+        public IAppCache PopulatedAppCache;
         public ComplexObject ComplexObject;
 
         [GlobalSetup]
         public void Setup()
         {
-            MemCache = new MemoryCache(new MemoryCacheOptions());
-            AppCache = new CachingService();
-
             ComplexObject = new ComplexObject();
+
+            MemCache = new MemoryCache(new MemoryCacheOptions());
+            PopulatedMemCache = new MemoryCache(new MemoryCacheOptions());
+
+            AppCache = new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
+            PopulatedAppCache = new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
+
+            PopulatedAppCache.Add(CacheKey, ComplexObject);
+            PopulatedMemCache.Set(CacheKey, ComplexObject);
         }
 
         [GlobalCleanup]
@@ -54,39 +62,75 @@ namespace LazyCache.Benchmarks
 
         /*
          *
-         * Benchmark Get Methods
+         * Benchmark Get Methods With a Cache Miss
          *
          */
 
-        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.Get))]
-        public ComplexObject DotNetMemoryCache_Get() => MemCache.Get<ComplexObject>(CacheKey);
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.Get) + "_Miss")]
+        public ComplexObject DotNetMemoryCache_Get_Miss() => MemCache.Get<ComplexObject>(CacheKey);
 
-        [Benchmark, BenchmarkCategory(nameof(IAppCache.Get))]
-        public ComplexObject LazyCache_Get() => AppCache.Get<ComplexObject>(CacheKey);
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.Get) + "_Miss")]
+        public ComplexObject LazyCache_Get_Miss() => AppCache.Get<ComplexObject>(CacheKey);
 
         /*
          *
-         * Benchmark GetOrAdd Methods
+         * Benchmark Get Methods With a Cache Hit
          *
          */
 
-        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAdd))]
-        public ComplexObject DotNetMemoryCache_GetOrAdd() => MemCache.GetOrCreate(CacheKey, entry => ComplexObject);
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.Get) + "_Hit")]
+        public ComplexObject DotNetMemoryCache_Get_Hit() => PopulatedMemCache.Get<ComplexObject>(CacheKey);
 
-        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAdd))]
-        public ComplexObject LazyCache_GetOrAdd() => AppCache.GetOrAdd(CacheKey, entry => ComplexObject);
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.Get) + "_Hit")]
+        public ComplexObject LazyCache_Get_Hit() => PopulatedAppCache.Get<ComplexObject>(CacheKey);
 
         /*
          *
-         * Benchmark GetOrAddAsync Methods
+         * Benchmark GetOrAdd Methods With Cache Miss
          *
          */
 
-        
-        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAddAsync))]
-        public Task<ComplexObject> DotNetMemoryCache_GetOrAddAsync() => MemCache.GetOrCreateAsync(CacheKey, entry => Task.FromResult(ComplexObject));
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAdd) + "_Miss")]
+        public ComplexObject DotNetMemoryCache_GetOrAdd_Miss() => MemCache.GetOrCreate(CacheKey, entry => ComplexObject);
 
-        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAddAsync))]
-        public Task<ComplexObject> LazyCache_GetOrAddAsync() => AppCache.GetOrAddAsync(CacheKey, entry => Task.FromResult(ComplexObject));
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAdd) + "_Miss")]
+        public ComplexObject LazyCache_GetOrAdd_Miss() => AppCache.GetOrAdd(CacheKey, entry => ComplexObject);
+
+        /*
+         *
+         * Benchmark GetOrAdd Methods With Cache Hit
+         *
+         */
+
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAdd) + "_Hit")]
+        public ComplexObject DotNetMemoryCache_GetOrAdd_Hit() => PopulatedMemCache.GetOrCreate(CacheKey, entry => ComplexObject);
+
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAdd) + "_Hit")]
+        public ComplexObject LazyCache_GetOrAdd_Hit() => PopulatedAppCache.GetOrAdd(CacheKey, entry => ComplexObject);
+
+        /*
+         *
+         * Benchmark GetOrAddAsync Methods With Cache Miss
+         *
+         */
+
+
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAddAsync) + "_Miss")]
+        public Task<ComplexObject> DotNetMemoryCache_GetOrAddAsync_Miss() => MemCache.GetOrCreateAsync(CacheKey, entry => Task.FromResult(ComplexObject));
+
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAddAsync) + "_Miss")]
+        public Task<ComplexObject> LazyCache_GetOrAddAsync_Miss() => AppCache.GetOrAddAsync(CacheKey, entry => Task.FromResult(ComplexObject));
+
+        /*
+         *
+         * Benchmark GetOrAddAsync Methods With Cache Hit
+         *
+         */
+
+        [Benchmark(Baseline = true), BenchmarkCategory(nameof(IAppCache.GetOrAddAsync) + "_Hit")]
+        public Task<ComplexObject> DotNetMemoryCache_GetOrAddAsync_Hit() => PopulatedMemCache.GetOrCreateAsync(CacheKey, entry => Task.FromResult(ComplexObject));
+
+        [Benchmark, BenchmarkCategory(nameof(IAppCache.GetOrAddAsync) + "_Hit")]
+        public Task<ComplexObject> LazyCache_GetOrAddAsync_Hit() => PopulatedAppCache.GetOrAddAsync(CacheKey, entry => Task.FromResult(ComplexObject));
     }
 }
