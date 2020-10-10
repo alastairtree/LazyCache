@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -9,18 +10,21 @@ namespace LazyCache
     public static class AppCacheExtensions
     {
         [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item)
         {
             Set(cache, key, item);
         }
 
         [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item, DateTimeOffset expires)
         {
             Set(cache, key, item, expires);
         }
 
         [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item, TimeSpan slidingExpiration)
         {
             Set(cache, key, item, slidingExpiration);

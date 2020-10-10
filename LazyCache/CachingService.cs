@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
@@ -63,6 +64,7 @@ namespace LazyCache
         public virtual CacheDefaults DefaultCachePolicy { get; set; } = new CacheDefaults();
 
         [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
             Set(key, item, policy);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -13,6 +14,7 @@ namespace LazyCache
         /// </summary>
         CacheDefaults DefaultCachePolicy { get; }
         [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void Add<T>(string key, T item, MemoryCacheEntryOptions policy);
         T Get<T>(string key);
         Task<T> GetAsync<T>(string key);
