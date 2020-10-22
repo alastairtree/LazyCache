@@ -16,7 +16,7 @@ namespace LazyCache.UnitTests
     {
         private static CachingService BuildCache()
         {
-            return new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions())));
+            return new CachingService(new MemoryCacheProvider(() => new MemoryCache(new MemoryCacheOptions())));
         }
 
         private IAppCache sut;
@@ -1107,6 +1107,19 @@ namespace LazyCache.UnitTests
             Assert.NotNull(sut.Get<object>(TestKey));
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
+        }
+
+        [Test]
+        public void NoItemsCanBeRetrievedFromCacheAfterRemoveAll()
+        {
+            var testKey2 = "TestKey2";
+            sut.Add(TestKey, new object());
+            sut.Add(testKey2, new object());
+            Assert.NotNull(sut.Get<object>(TestKey));
+            Assert.NotNull(sut.Get<object>(testKey2));
+            sut.RemoveAll();
+            Assert.Null(sut.Get<object>(TestKey));
+            Assert.Null(sut.Get<object>(testKey2));
         }
     }
 }

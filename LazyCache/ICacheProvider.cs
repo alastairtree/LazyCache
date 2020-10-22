@@ -11,6 +11,7 @@ namespace LazyCache
         object GetOrCreate<T>(string key, Func<ICacheEntry, T> func);
         object GetOrCreate<T>(string key, MemoryCacheEntryOptions policy, Func<ICacheEntry, T> func);
         void Remove(string key);
+        void RemoveAll();
         Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> func);
     }
 }

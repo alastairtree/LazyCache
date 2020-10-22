@@ -3,6 +3,7 @@ using LazyCache;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace - MS guidelines say put DI registration in this NS
 namespace Microsoft.Extensions.DependencyInjection
@@ -15,8 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services == null) throw new ArgumentNullException(nameof(services));
 
             services.AddOptions();
-            services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
-            services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>());
+            services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>(serviceProvider => 
+                new MemoryCacheProvider(() => new MemoryCache(new MemoryCacheOptions()))));
 
             services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>(serviceProvider => 
                 new CachingService(
@@ -32,8 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
             if (implementationFactory == null) throw new ArgumentNullException(nameof(implementationFactory));
 
             services.AddOptions();
-            services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
-            services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>());
+            services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>(serviceProvider =>
+                new MemoryCacheProvider(() => new MemoryCache(new MemoryCacheOptions()))));
 
             services.TryAdd(ServiceDescriptor.Singleton<IAppCache>(implementationFactory));
 

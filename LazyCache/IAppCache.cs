@@ -20,5 +20,7 @@ namespace LazyCache
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory);
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory, MemoryCacheEntryOptions policy);
         void Remove(string key);
+
+        void RemoveAll();
     }
 }

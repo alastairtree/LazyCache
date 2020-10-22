@@ -2,6 +2,7 @@
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Ninject;
 using Ninject.Modules;
 
 namespace LazyCache
@@ -23,8 +24,8 @@ namespace LazyCache
         public override void Load()
         {
             Bind<IOptions<MemoryCacheOptions>>().ToConstant(Options.Create(new MemoryCacheOptions()));
-            Bind<IMemoryCache>().To<MemoryCache>().InSingletonScope();
-            Bind<ICacheProvider>().To<MemoryCacheProvider>().InSingletonScope();
+            Bind<ICacheProvider>().To<MemoryCacheProvider>().InSingletonScope()
+                .WithConstructorArgument<Func<IMemoryCache>>(context => () => new MemoryCache(context.Kernel.Get<IOptions<MemoryCacheOptions>>()));
 
             if (implementationFactory == null)
                 Bind<IAppCache>().To<CachingService>().InSingletonScope();

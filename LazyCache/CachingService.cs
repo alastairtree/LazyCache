@@ -42,7 +42,7 @@ namespace LazyCache
 
         public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; }
             = new Lazy<ICacheProvider>(() => 
-                new MemoryCacheProvider(
+                new MemoryCacheProvider(() =>
                     new MemoryCache(
                         new MemoryCacheOptions())
                 ));
@@ -168,6 +168,11 @@ namespace LazyCache
         {
             ValidateKey(key);
             CacheProvider.Remove(key);
+        }
+
+        public virtual void RemoveAll()
+        {
+            CacheProvider.RemoveAll();
         }
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
