@@ -41,7 +41,7 @@ namespace LazyCache
         }
 
         public static Lazy<ICacheProvider> DefaultCacheProvider { get; set; }
-            = new Lazy<ICacheProvider>(() => 
+            = new Lazy<ICacheProvider>(() =>
                 new MemoryCacheProvider(
                     new MemoryCache(
                         new MemoryCacheOptions())
@@ -89,6 +89,13 @@ namespace LazyCache
             return GetValueFromAsyncLazy<T>(item, out _);
         }
 
+        public virtual bool TryGetValue<T>(string key, out object value)
+        {
+            ValidateKey(key);
+
+            return CacheProvider.TryGetValue(key, out value);
+        }
+
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
         {
             return GetOrAdd(key, addItemFactory, null);
@@ -112,7 +119,7 @@ namespace LazyCache
             // acquire lock per key
             uint hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
             while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
-            
+
             try
             {
                 cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
@@ -179,7 +186,7 @@ namespace LazyCache
 
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory,
             MemoryCacheEntryOptions policy)
-        { 
+        {
             ValidateKey(key);
 
             object cacheItem;
@@ -280,7 +287,7 @@ namespace LazyCache
 
         protected virtual Task<T> GetValueFromAsyncLazy<T>(object item, out bool valueHasChangedType)
         {
-            valueHasChangedType = false; 
+            valueHasChangedType = false;
             switch (item)
             {
                 case AsyncLazy<T> asyncLazy:

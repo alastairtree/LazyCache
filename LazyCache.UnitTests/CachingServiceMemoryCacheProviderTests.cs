@@ -32,7 +32,7 @@ namespace LazyCache.UnitTests
 
         private class ComplexTestObject
         {
-            public readonly IList<object> SomeItems = new List<object> {1, 2, 3, "testing123"};
+            public readonly IList<object> SomeItems = new List<object> { 1, 2, 3, "testing123" };
             public string SomeMessage = "testing123";
         }
 
@@ -528,7 +528,7 @@ namespace LazyCache.UnitTests
                 Thread.Sleep(500);
 
             Assert.That(callbackValue, Is.AssignableTo<Task<int>>());
-            var callbackResultValue = await (Task<int>) callbackValue;
+            var callbackResultValue = await (Task<int>)callbackValue;
             Assert.AreEqual(123, callbackResultValue);
         }
 
@@ -873,7 +873,7 @@ namespace LazyCache.UnitTests
                     .SetAbsoluteExpiration(refreshInterval, ExpirationMode.ImmediateEviction);
                 options.RegisterPostEvictionCallback((keyEvicted, value, reason, state) =>
                 {
-                    if (reason == EvictionReason.Expired  || reason == EvictionReason.TokenExpired)
+                    if (reason == EvictionReason.Expired || reason == EvictionReason.TokenExpired)
                         sut.GetOrAdd(key, _ => GetStuff(), GetOptions());
                 });
                 return options;
@@ -946,7 +946,7 @@ namespace LazyCache.UnitTests
                     {
                         var key = $"stuff-{hits % uniqueCacheItems}";
                         var cached = await sut.GetOrAddAsync(key, () => GetStuffAsync(), DateTimeOffset.UtcNow.AddSeconds(1));
-                        if(!cancel.IsCancellationRequested) Interlocked.Increment(ref hits);
+                        if (!cancel.IsCancellationRequested) Interlocked.Increment(ref hits);
                     }
                 });
             });
@@ -1107,6 +1107,23 @@ namespace LazyCache.UnitTests
             Assert.NotNull(sut.Get<object>(TestKey));
             sut.Remove(TestKey);
             Assert.Null(sut.Get<object>(TestKey));
+        }
+
+        [Test]
+        public void TryGetReturnsCachedValueAndTrue()
+        {
+            string val = "Test Value";
+            string key = "testkey";
+            sut.Add(key, val);
+
+            var contains = sut.TryGetValue<string>(key, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, val);
+
+            var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
         }
     }
 }

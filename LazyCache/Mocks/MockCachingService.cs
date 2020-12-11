@@ -51,5 +51,11 @@ namespace LazyCache.Mocks
         public void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
         }
+
+        public bool TryGetValue<T>(string key, out object value)
+        {
+            value = default(T);
+            return true;
+        }
     }
 }
