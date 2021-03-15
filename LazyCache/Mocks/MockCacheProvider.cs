@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace LazyCache.Mocks
 {
+
     public class MockCacheProvider : ICacheProvider
     {
         public void Set(string key, object item, MemoryCacheEntryOptions policy)
@@ -32,6 +33,11 @@ namespace LazyCache.Mocks
         public Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> func)
         {
             return func(null);
+        }
+
+        public bool TryGetValue(object key, out object value)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

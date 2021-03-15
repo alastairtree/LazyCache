@@ -32,7 +32,7 @@ namespace LazyCache.Providers
 
         public object GetOrCreate<T>(string key, MemoryCacheEntryOptions policy, Func<ICacheEntry, T> factory)
         {
-            if(policy == null)
+            if (policy == null)
                 return cache.GetOrCreate(key, factory);
 
             if (!cache.TryGetValue(key, out var result))
@@ -47,7 +47,7 @@ namespace LazyCache.Providers
                     var expiryTokenSource = new CancellationTokenSource();
                     var expireToken = new CancellationChangeToken(expiryTokenSource.Token);
                     entry.AddExpirationToken(expireToken);
-                    entry.RegisterPostEvictionCallback((keyPost, value, reason, state) => 
+                    entry.RegisterPostEvictionCallback((keyPost, value, reason, state) =>
                         expiryTokenSource.Dispose());
 
                     result = factory(entry);
@@ -77,6 +77,12 @@ namespace LazyCache.Providers
         {
             return cache.GetOrCreateAsync(key, factory);
         }
+
+        public bool TryGetValue(object key, out object value)
+        {
+            return cache.TryGetValue(key, out value);
+        }
+
 
         public void Dispose()
         {
