@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -8,25 +9,25 @@ namespace LazyCache
 {
     public static class AppCacheExtensions
     {
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item)
         {
-            if (cache == null) throw new ArgumentNullException(nameof(cache));
-
-            cache.Add(key, item, cache.DefaultCachePolicy.BuildOptions());
+            Set(cache, key, item);
         }
 
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item, DateTimeOffset expires)
         {
-            if (cache == null) throw new ArgumentNullException(nameof(cache));
-
-            cache.Add(key, item, new MemoryCacheEntryOptions {AbsoluteExpiration = expires});
+            Set(cache, key, item, expires);
         }
 
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Add<T>(this IAppCache cache, string key, T item, TimeSpan slidingExpiration)
         {
-            if (cache == null) throw new ArgumentNullException(nameof(cache));
-
-            cache.Add(key, item, new MemoryCacheEntryOptions {SlidingExpiration = slidingExpiration});
+            Set(cache, key, item, slidingExpiration);
         }
 
         public static T GetOrAdd<T>(this IAppCache cache, string key, Func<T> addItemFactory)
@@ -115,6 +116,27 @@ namespace LazyCache
             if (cache == null) throw new ArgumentNullException(nameof(cache));
 
             return cache.GetOrAddAsync(key, _=> addItemFactory(), policy);
+        }
+
+        public static void Set<T>(this IAppCache cache, string key, T item)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+
+            cache.Set(key, item, cache.DefaultCachePolicy.BuildOptions());
+        }
+
+        public static void Set<T>(this IAppCache cache, string key, T item, DateTimeOffset expires)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+
+            cache.Set(key, item, new MemoryCacheEntryOptions { AbsoluteExpiration = expires });
+        }
+
+        public static void Set<T>(this IAppCache cache, string key, T item, TimeSpan slidingExpiration)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+
+            cache.Set(key, item, new MemoryCacheEntryOptions { SlidingExpiration = slidingExpiration });
         }
     }
 }
