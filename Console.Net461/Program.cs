@@ -22,6 +22,15 @@ namespace Console.Net461
             item = cache.GetOrAdd("Program.Main.Person", () => Tuple.Create("Joe Blogs", DateTime.UtcNow));
 
             System.Console.WriteLine(item.Item1);
+
+            System.Console.WriteLine("Enumerating keys...");
+            foreach (var key in cache.GetCacheKeys().Keys)
+            {
+                System.Console.WriteLine($"{key}");
+            }
+            System.Console.WriteLine("Finished enumerating keys...");
+
+            System.Console.ReadLine();
         }
     }
 }

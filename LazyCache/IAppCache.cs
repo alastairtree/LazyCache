@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -22,5 +23,6 @@ namespace LazyCache
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory);
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory, MemoryCacheEntryOptions policy);
         void Remove(string key);
+        Dictionary<string, CachedItemMeta> GetCacheKeys();
     }
 }
