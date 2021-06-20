@@ -97,6 +97,11 @@ namespace LazyCache
             return keyWasFound;
         }
 
+        public bool TryGetValueAsync<T>(string key, out Task<T> value)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
         {
             return GetOrAdd(key, addItemFactory, null);

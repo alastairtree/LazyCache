@@ -16,6 +16,7 @@ namespace LazyCache
         T Get<T>(string key);
         Task<T> GetAsync<T>(string key);
         bool TryGetValue<T>(string key, out T value);
+        bool TryGetValueAsync<T>(string key, out Task<T> value);
 
         T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory);
         T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory, MemoryCacheEntryOptions policy);
