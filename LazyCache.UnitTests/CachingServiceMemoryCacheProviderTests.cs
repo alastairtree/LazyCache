@@ -1182,5 +1182,77 @@ namespace LazyCache.UnitTests
             Assert.IsFalse(contains2);
             Assert.IsNull(value2);
         }
+
+        [Test]
+        public void GetOrAddValueTypeThenTryGetReturnsCachedValueAndTrue()
+        {
+            const int value = 13;
+            const string key = "testkey";
+            sut.GetOrAdd<int>(key, () => value);
+
+            var contains = sut.TryGetValue<int>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<int>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(int), value2);
+        }
+
+        [Test]
+        public void GetOrAddStructThenTryGetReturnsCachedValueAndTrue()
+        {
+            var value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(DateTime), value2);
+        }
+
+        [Test]
+        public void GetOrAddNullableStructWithValueThenTryGetReturnsCachedValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime?>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddNullableStructWithoutValueThenTryGetReturnsCachedValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime?>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
     }
 }
