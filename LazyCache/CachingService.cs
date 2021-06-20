@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
 
 namespace LazyCache
 {
@@ -97,7 +96,6 @@ namespace LazyCache
             return keyWasFound;
         }
 
-        // TODO EM: add unit tests
         public virtual bool TryGetValueAsync<T>(string key, out Task<T> value)
         {
             ValidateKey(key);
