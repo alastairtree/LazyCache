@@ -1160,6 +1160,27 @@ namespace LazyCache.UnitTests
 
             Assert.IsTrue(contains);
             Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddComplexObjectThenTryGetReturnsCachedValueAndTrue()
+        {
+            sut.GetOrAdd<ComplexTestObject>(TestKey, () => testObject);
+
+            var contains = sut.TryGetValue<ComplexTestObject>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(testObject, value);
+
+            var contains2 = sut.TryGetValue<ComplexTestObject>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
         }
     }
 }
