@@ -1375,7 +1375,6 @@ namespace LazyCache.UnitTests
         }
 
 
-
         [Test]
         public void TryGetValueAsyncThrowsWhenKeyIsNull()
         {
