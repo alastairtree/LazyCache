@@ -92,7 +92,7 @@ namespace LazyCache
             ValidateKey(key);
 
             var keyWasFound = CacheProvider.TryGetValue(key, out var cachedValue);
-            value = (T)cachedValue;
+            value = GetValueFromLazy<T>(cachedValue, out _);
 
             return keyWasFound;
         }

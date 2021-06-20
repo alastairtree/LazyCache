@@ -1148,5 +1148,18 @@ namespace LazyCache.UnitTests
             Assert.IsFalse(contains2);
             Assert.IsNull(value2);
         }
+
+        [Test]
+        public void GetOrAddThenTryGetReturnsCachedValueAndTrue()
+        {
+            const string value = "Test Value";
+            const string key = "testkey";
+            sut.GetOrAdd<string>(key, () => value);
+
+            var contains = sut.TryGetValue<string>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+        }
     }
 }
