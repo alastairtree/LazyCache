@@ -97,9 +97,15 @@ namespace LazyCache
             return keyWasFound;
         }
 
-        public bool TryGetValueAsync<T>(string key, out Task<T> value)
+        // TODO EM: add unit tests
+        public virtual bool TryGetValueAsync<T>(string key, out Task<T> value)
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            var keyWasFound = CacheProvider.TryGetValue(key, out var cachedValue);
+            value = GetValueFromAsyncLazy<T>(cachedValue, out _);
+
+            return keyWasFound;
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)

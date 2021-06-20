@@ -60,7 +60,8 @@ namespace LazyCache.Mocks
 
         public bool TryGetValueAsync<T>(string key, out Task<T> value)
         {
-            throw new NotImplementedException();
+            value = Task.FromResult(default(T));
+            return true;
         }
     }
 }
