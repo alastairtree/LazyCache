@@ -1134,8 +1134,8 @@ namespace LazyCache.UnitTests
         [Test]
         public void TryGetReturnsCachedValueAndTrue()
         {
-            string val = "Test Value";
-            string key = "testkey";
+            const string val = "Test Value";
+            const string key = "testkey";
             sut.Add(key, val);
 
             var contains = sut.TryGetValue<string>(key, out var value);
@@ -1146,6 +1146,7 @@ namespace LazyCache.UnitTests
             var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
 
             Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
         }
     }
 }

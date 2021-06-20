@@ -87,11 +87,14 @@ namespace LazyCache
             return GetValueFromAsyncLazy<T>(item, out _);
         }
 
-        public virtual bool TryGetValue<T>(string key, out object value)
+        public virtual bool TryGetValue<T>(string key, out T value)
         {
             ValidateKey(key);
 
-            return CacheProvider.TryGetValue(key, out value);
+            var keyWasFound = CacheProvider.TryGetValue(key, out var cachedValue);
+            value = (T)cachedValue;
+
+            return keyWasFound;
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
