@@ -1150,6 +1150,94 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void TryGetReturnsCachedComplexObjectAndTrue()
+        {
+            sut.Add(TestKey, testObject);
+
+            var contains = sut.TryGetValue<ComplexTestObject>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(testObject, value);
+
+            var contains2 = sut.TryGetValue<ComplexTestObject>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void TryGetReturnsCachedValueTypeAndTrue()
+        {
+            const int value = 13;
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<int>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<int>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(int), value2);
+        }
+
+        [Test]
+        public void TryGetReturnsCachedStructAndTrue()
+        {
+            var value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(DateTime), value2);
+        }
+
+        [Test]
+        public void TryGetReturnsCachedNullableStructWithValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void TryGetReturnsCachedNullableStructWithoutValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
         public void GetOrAddThenTryGetReturnsCachedValueAndTrue()
         {
             const string value = "Test Value";
