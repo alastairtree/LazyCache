@@ -1433,7 +1433,9 @@ namespace LazyCache.UnitTests
 
             Assert.IsFalse(contains2);
             Assert.IsNotNull(taskForValue2);
-            Assert.IsNull(await taskForValue2.ConfigureAwait(false));
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
         }
 
         [Test]
@@ -1460,7 +1462,9 @@ namespace LazyCache.UnitTests
 
             Assert.IsFalse(contains2);
             Assert.IsNotNull(taskForValue2);
-            Assert.IsNull(await taskForValue2.ConfigureAwait(false));
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
         }
 
         [Test]
@@ -1490,7 +1494,9 @@ namespace LazyCache.UnitTests
 
             Assert.IsFalse(contains2);
             Assert.IsNotNull(taskForValue2);
-            Assert.AreEqual(default(int), await taskForValue2.ConfigureAwait(false));
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.AreEqual(default(int), fetchedValue2);
         }
 
         [Test]
@@ -1520,7 +1526,73 @@ namespace LazyCache.UnitTests
 
             Assert.IsFalse(contains2);
             Assert.IsNotNull(taskForValue2);
-            Assert.AreEqual(default(DateTime), await taskForValue2.ConfigureAwait(false));
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.AreEqual(default(DateTime), fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncNullableStructWithValueThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<DateTime?>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<DateTime?>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<DateTime?>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncNullableStructWithoutValueThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<DateTime?>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<DateTime?>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<DateTime?>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
         }
     }
 }
