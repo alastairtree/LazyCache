@@ -1132,6 +1132,48 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void TryGetThrowsWhenKeyIsNull()
+        {
+            var exception = Assert.Throws<ArgumentNullException>(InvokeTryGetWithNullKey);
+
+            Assert.AreEqual("key", exception.ParamName);
+
+            void InvokeTryGetWithNullKey()
+            {
+                const string key = null;
+                _ = sut.TryGetValue<string>(key, out var _);
+            }
+        }
+
+        [Test]
+        public void TryGetThrowsWhenKeyIsEmptyString()
+        {
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(InvokeTryGetWithEmptyStringKey);
+
+            Assert.AreEqual("key", exception.ParamName);
+
+            void InvokeTryGetWithEmptyStringKey()
+            {
+                var key = string.Empty;
+                _ = sut.TryGetValue<string>(key, out var _);
+            }
+        }
+
+        [Test]
+        public void TryGetThrowsWhenKeyIsWhiteSpacesString()
+        {
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(InvokeTryGetWithWhiteSpacesKey);
+
+            Assert.AreEqual("key", exception.ParamName);
+
+            void InvokeTryGetWithWhiteSpacesKey()
+            {
+                const string key = "   ";
+                _ = sut.TryGetValue<string>(key, out var _);
+            }
+        }
+
+        [Test]
         public void TryGetReturnsCachedValueAndTrue()
         {
             const string val = "Test Value";
