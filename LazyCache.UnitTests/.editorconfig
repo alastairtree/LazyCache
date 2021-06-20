@@ -1,7 +1,0 @@
-# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
-root = true
-
-# C# files
-[*.cs]
-indent_style = space
-indent_size = 4

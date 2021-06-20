@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LazyCache
 {
@@ -96,6 +97,7 @@ namespace LazyCache
             return keyWasFound;
         }
 
+        [SuppressMessage("Naming", "RCS1047:Non-asynchronous method name should not end with 'Async'.", Justification = "Using Async suffix here it's fine. This method name follows the same pattern used for the other methods in this class.")]
         public virtual bool TryGetValueAsync<T>(string key, out Task<T> value)
         {
             ValidateKey(key);
