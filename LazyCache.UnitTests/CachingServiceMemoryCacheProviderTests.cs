@@ -127,10 +127,32 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public void AddNullThrowsException()
+        public void AddNullDoesNotThrowException()
         {
             Action act = () => sut.Add<object>(TestKey, null);
-            act.Should().Throw<ArgumentNullException>();
+            act.Should().NotThrow<ArgumentNullException>();
+        }
+
+        [Test]
+        public void AddNullThenGetReturnsCachedNullReference()
+        {
+            const string testValue = null;
+
+            sut.Add(TestKey, testValue);
+
+            Assert.IsNull(sut.Get<string>(TestKey));
+        }
+
+        [Test]
+        public void AddNullThenTryGetReturnsTrueAndTheCachedNullReference()
+        {
+            const string testValue = null;
+            sut.Add(TestKey, testValue);
+
+            var contains = sut.TryGetValue<string>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(value);
         }
 
         [Test]
@@ -1109,11 +1131,42 @@ namespace LazyCache.UnitTests
             Assert.Null(sut.Get<object>(TestKey));
         }
 
+
         [Test]
-        public void TryGetReturnsCachedValueAndTrue()
+        public void TryGetValueThrowsWhenKeyIsNull()
         {
-            string val = "Test Value";
-            string key = "testkey";
+            TestDelegate testDelegate = () => sut.TryGetValue<string>(null, out var _);
+
+            var exception = Assert.Throws<ArgumentNullException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public void TryGetValueThrowsWhenKeyIsEmptyString()
+        {
+            TestDelegate testDelegate = () => sut.TryGetValue<string>(string.Empty, out var _);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public void TryGetValueThrowsWhenKeyIsWhiteSpacesString()
+        {
+            TestDelegate testDelegate = () => sut.TryGetValue<string>("   ", out var _);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedValueAndTrue()
+        {
+            const string val = "Test Value";
+            const string key = "testkey";
             sut.Add(key, val);
 
             var contains = sut.TryGetValue<string>(key, out var value);
@@ -1124,6 +1177,421 @@ namespace LazyCache.UnitTests
             var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
 
             Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedComplexObjectAndTrue()
+        {
+            sut.Add(TestKey, testObject);
+
+            var contains = sut.TryGetValue<ComplexTestObject>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(testObject, value);
+
+            var contains2 = sut.TryGetValue<ComplexTestObject>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedValueTypeAndTrue()
+        {
+            const int value = 13;
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<int>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<int>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(int), value2);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedStructAndTrue()
+        {
+            var value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(DateTime), value2);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedNullableStructWithValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void TryGetValueReturnsCachedNullableStructWithoutValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+            sut.Add(key, value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            const string value = "Test Value";
+            const string key = "testkey";
+            sut.GetOrAdd<string>(key, () => value);
+
+            var contains = sut.TryGetValue<string>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddComplexObjectThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            sut.GetOrAdd<ComplexTestObject>(TestKey, () => testObject);
+
+            var contains = sut.TryGetValue<ComplexTestObject>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(testObject, value);
+
+            var contains2 = sut.TryGetValue<ComplexTestObject>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddValueTypeThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            const int value = 13;
+            const string key = "testkey";
+            sut.GetOrAdd<int>(key, () => value);
+
+            var contains = sut.TryGetValue<int>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<int>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(int), value2);
+        }
+
+        [Test]
+        public void GetOrAddStructThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            var value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.AreEqual(default(DateTime), value2);
+        }
+
+        [Test]
+        public void GetOrAddNullableStructWithValueThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime?>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+        [Test]
+        public void GetOrAddNullableStructWithoutValueThenTryGetValueReturnsCachedValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+            sut.GetOrAdd<DateTime?>(key, () => value);
+
+            var contains = sut.TryGetValue<DateTime?>(key, out var fetchedValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValue<DateTime?>("invalidkey", out var value2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNull(value2);
+        }
+
+
+        [Test]
+        public void TryGetValueAsyncThrowsWhenKeyIsNull()
+        {
+            TestDelegate testDelegate = () => sut.TryGetValueAsync<string>(null, out var _);
+
+            var exception = Assert.Throws<ArgumentNullException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public void TryGetValueAsyncThrowsWhenKeyIsEmptyString()
+        {
+            TestDelegate testDelegate = () => sut.TryGetValueAsync<string>(string.Empty, out var _);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public void TryGetValueAsyncThrowsWhenKeyIsWhiteSpacesString()
+        {
+            TestDelegate testDelegate = () => sut.TryGetValueAsync<string>("   ", out var _);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(testDelegate);
+
+            Assert.AreEqual("key", exception.ParamName);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            const string value = "Test Value";
+            const string key = "testkey";
+            
+            _ = await sut.GetOrAddAsync<string>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<string>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<string>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncComplexObjectThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            _ = await sut.GetOrAddAsync<ComplexTestObject>(
+                TestKey,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return testObject;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<ComplexTestObject>(TestKey, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(testObject, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<ComplexTestObject>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncValueTypeThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            const int value = 13;
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<int>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<int>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<int>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.AreEqual(default(int), fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncStructThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            var value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<DateTime>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<DateTime>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<DateTime>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.AreEqual(default(DateTime), fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncNullableStructWithValueThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            DateTime? value = new DateTime(2021, 6, 20, 10, 41, 13);
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<DateTime?>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<DateTime?>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.AreEqual(value, fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<DateTime?>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncNullableStructWithoutValueThenTryGetValueAsyncReturnsCachedValueAndTrue()
+        {
+            DateTime? value = null;
+            const string key = "testkey";
+
+            _ = await sut.GetOrAddAsync<DateTime?>(
+                key,
+                async () =>
+                {
+                    await Task.Delay(4).ConfigureAwait(false);
+                    return value;
+                }
+            ).ConfigureAwait(false);
+
+            var contains = sut.TryGetValueAsync<DateTime?>(key, out var taskForValue);
+
+            Assert.IsTrue(contains);
+            Assert.IsNotNull(taskForValue);
+
+            var fetchedValue = await taskForValue.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue);
+
+            var contains2 = sut.TryGetValueAsync<DateTime?>("invalidkey", out var taskForValue2);
+
+            Assert.IsFalse(contains2);
+            Assert.IsNotNull(taskForValue2);
+
+            var fetchedValue2 = await taskForValue2.ConfigureAwait(false);
+            Assert.IsNull(fetchedValue2);
         }
     }
 }

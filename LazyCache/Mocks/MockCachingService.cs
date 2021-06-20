@@ -52,9 +52,15 @@ namespace LazyCache.Mocks
         {
         }
 
-        public bool TryGetValue<T>(string key, out object value)
+        public bool TryGetValue<T>(string key, out T value)
         {
             value = default(T);
+            return true;
+        }
+
+        public bool TryGetValueAsync<T>(string key, out Task<T> value)
+        {
+            value = Task.FromResult(default(T));
             return true;
         }
     }

@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LazyCache
 {
@@ -64,8 +64,6 @@ namespace LazyCache
 
         public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
             ValidateKey(key);
 
             CacheProvider.Set(key, item, policy);
@@ -89,11 +87,25 @@ namespace LazyCache
             return GetValueFromAsyncLazy<T>(item, out _);
         }
 
-        public virtual bool TryGetValue<T>(string key, out object value)
+        public virtual bool TryGetValue<T>(string key, out T value)
         {
             ValidateKey(key);
 
-            return CacheProvider.TryGetValue(key, out value);
+            var keyWasFound = CacheProvider.TryGetValue(key, out var cachedValue);
+            value = GetValueFromLazy<T>(cachedValue, out _);
+
+            return keyWasFound;
+        }
+
+        [SuppressMessage("Naming", "RCS1047:Non-asynchronous method name should not end with 'Async'.", Justification = "Using Async suffix here it's fine. This method name follows the same pattern used for the other methods in this class.")]
+        public virtual bool TryGetValueAsync<T>(string key, out Task<T> value)
+        {
+            ValidateKey(key);
+
+            var keyWasFound = CacheProvider.TryGetValue(key, out var cachedValue);
+            value = GetValueFromAsyncLazy<T>(cachedValue, out _);
+
+            return keyWasFound;
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
