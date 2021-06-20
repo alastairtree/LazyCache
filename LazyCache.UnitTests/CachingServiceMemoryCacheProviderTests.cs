@@ -144,6 +144,18 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void AddNullThenTryGetReturnsTrueAndTheCachedNullReference()
+        {
+            const string testValue = null;
+            sut.Add(TestKey, testValue);
+
+            var contains = sut.TryGetValue<string>(TestKey, out var value);
+
+            Assert.IsTrue(contains);
+            Assert.IsNull(value);
+        }
+
+        [Test]
         public void AddThenGetReturnsCachedObject()
         {
             sut.Add(TestKey, "testObject");
