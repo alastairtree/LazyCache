@@ -64,8 +64,6 @@ namespace LazyCache
 
         public virtual void Add<T>(string key, T item, MemoryCacheEntryOptions policy)
         {
-            if (item == null)
-                throw new ArgumentNullException(nameof(item));
             ValidateKey(key);
 
             CacheProvider.Set(key, item, policy);

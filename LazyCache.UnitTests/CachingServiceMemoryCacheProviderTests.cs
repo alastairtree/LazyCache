@@ -127,10 +127,20 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public void AddNullThrowsException()
+        public void AddNullDoesNotThrowException()
         {
             Action act = () => sut.Add<object>(TestKey, null);
-            act.Should().Throw<ArgumentNullException>();
+            act.Should().NotThrow<ArgumentNullException>();
+        }
+
+        [Test]
+        public void AddNullThenGetReturnsCachedNullReference()
+        {
+            const string testValue = null;
+
+            sut.Add(TestKey, testValue);
+
+            Assert.IsNull(sut.Get<string>(TestKey));
         }
 
         [Test]
