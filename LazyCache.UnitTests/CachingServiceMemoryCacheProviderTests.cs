@@ -791,7 +791,7 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateAfterCallingFactoryDoesExpireItems()
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateAfterLongRunningTaskDoesExpireItems()
         {
             var millisecondsCacheDuration = 100;
             var validResult = await sut.GetOrAddAsync(
@@ -812,7 +812,7 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
-        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateUsingTimeSpanAfterCallingFactoryDoesExpireItems()
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateUsingTimeSpanAfterLongRunningTaskDoesExpireItems()
         {
             var millisecondsCacheDuration = 100;
             var validResult = await sut.GetOrAddAsync(
