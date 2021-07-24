@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
 
 namespace LazyCache
 {
@@ -201,9 +200,9 @@ namespace LazyCache
             while (Interlocked.CompareExchange(ref keyLocks[hash], 1, 0) == 1) { Thread.Yield(); }
 
             object CacheFactory(ICacheEntry entry) =>
-                new AsyncLazy<T>(() =>
+                new AsyncLazy<T>(async () =>
                 {
-                    var result = addItemFactory(entry);
+                    var result = await addItemFactory(entry).ConfigureAwait(false);
                     SetAbsoluteExpirationFromRelative(entry);
                     EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
                     return result;
@@ -241,7 +240,6 @@ namespace LazyCache
                     }
                     result = GetValueFromAsyncLazy<T>(cacheItem, out _ /* we just evicted so type change cannot happen this time */);
                 }
-
 
                 if (result.IsCanceled || result.IsFaulted)
                     CacheProvider.Remove(key);
