@@ -255,6 +255,14 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddWithParameterAndThenGetObjectReturnsCorrectType()
+        {
+            sut.GetOrAdd(TestKey, (parameter) => testObject, "");
+            var actual = sut.Get<ComplexTestObject>(TestKey);
+            Assert.IsNotNull(actual);
+        }
+
+        [Test]
         public void GetOrAddAndThenGetOrAddDifferentTypeDoesLastInWins()
         {
             var first = sut.GetOrAdd(TestKey, () => new object());
