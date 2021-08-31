@@ -35,7 +35,7 @@ namespace LazyCache.Mocks
             return func(null);
         }
 
-        public bool TryGetValue(object key, out object value)
+        public bool TryGetValue<T>(object key, out T value)
         {
             throw new NotImplementedException();
         }
