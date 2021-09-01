@@ -791,6 +791,48 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateAfterLongRunningTaskDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                async entry =>
+                {
+                    await Task.Delay(50);
+                    entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddMilliseconds(millisecondsCacheDuration));
+                    return new ComplexTestObject();
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncWithAbsoluteOffsetExpiryInTheDelegateUsingTimeSpanAfterLongRunningTaskDoesExpireItems()
+        {
+            var millisecondsCacheDuration = 100;
+            var validResult = await sut.GetOrAddAsync(
+                TestKey,
+                async entry =>
+                {
+                    await Task.Delay(50);
+                    entry.SetAbsoluteExpiration(TimeSpan.FromMilliseconds(millisecondsCacheDuration));
+                    return new ComplexTestObject();
+                }
+            );
+            // pass expiry time with a delay
+            Thread.Sleep(TimeSpan.FromMilliseconds(millisecondsCacheDuration + 50));
+            var expiredResult = sut.Get<ComplexTestObject>(TestKey);
+
+            Assert.That(validResult, Is.Not.Null);
+            Assert.That(expiredResult, Is.Null);
+        }
+
+        [Test]
         public void GetOrAddWithCancellationExpiryBasedOnTimerAndCallbackInTheDelegateDoesExpireItemsAndFireTheCallback()
         {
             var millisecondsCacheDuration = 100;
