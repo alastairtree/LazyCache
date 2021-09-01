@@ -89,7 +89,7 @@ namespace LazyCache
             return GetValueFromAsyncLazy<T>(item, out _);
         }
 
-        public virtual bool TryGetValue<T>(string key, out object value)
+        public virtual bool TryGetValue<T>(string key, out T value)
         {
             ValidateKey(key);
 

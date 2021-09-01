@@ -1124,6 +1124,8 @@ namespace LazyCache.UnitTests
             var contains2 = sut.TryGetValue<string>("invalidkey", out var value2);
 
             Assert.IsFalse(contains2);
+
+            Assert.Throws<InvalidCastException>(() => sut.TryGetValue<int>(key, out var value3));
         }
     }
 }

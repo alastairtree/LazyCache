@@ -78,7 +78,7 @@ namespace LazyCache.Providers
             return cache.GetOrCreateAsync(key, factory);
         }
 
-        public bool TryGetValue(object key, out object value)
+        public bool TryGetValue<T>(object key, out T value)
         {
             return cache.TryGetValue(key, out value);
         }
