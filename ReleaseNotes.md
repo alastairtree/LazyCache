@@ -1,5 +1,10 @@
 # Release notes for LazyCache #
 
+## Version 2.4.0
+- Bug fix for generic type - see #163. Thanks @gamblen
+- Bug fix for async wait and abs expiry. Thanks @allanrodriguez
+- (Very minor API change that is compiler compatible, but not binary compatible, so incrementing the minor.)
+
 ## Version 2.1.3
 - Rename ExpirationMode.ImmediateExpiry => ExpirationMode.ImmediateEviction
 - Lovely new logo! (#133) Thanks to @doolali
