@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore30",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsCore31", "LazyCache.UnitTestsCore31\LazyCache.UnitTestsCore31.csproj", "{2E025606-884D-4C48-8490-99EB1EA7B268}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyCache.Benchmarks", "LazyCache.Benchmarks\LazyCache.Benchmarks.csproj", "{CE7DF61F-03B2-493E-8BFF-6E744015DE14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.Benchmarks", "LazyCache.Benchmarks\LazyCache.Benchmarks.csproj", "{CE7DF61F-03B2-493E-8BFF-6E744015DE14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LazyCache.UnitTestsNet50", "LazyCache.UnitTestsNet50\LazyCache.UnitTestsNet50.csproj", "{735910E0-E533-4D8B-91AC-6CA7415DEE0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,10 @@ Global
 		{CE7DF61F-03B2-493E-8BFF-6E744015DE14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE7DF61F-03B2-493E-8BFF-6E744015DE14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE7DF61F-03B2-493E-8BFF-6E744015DE14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{735910E0-E533-4D8B-91AC-6CA7415DEE0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{735910E0-E533-4D8B-91AC-6CA7415DEE0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{735910E0-E533-4D8B-91AC-6CA7415DEE0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{735910E0-E533-4D8B-91AC-6CA7415DEE0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
