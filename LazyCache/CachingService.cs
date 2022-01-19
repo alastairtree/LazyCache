@@ -43,7 +43,7 @@ namespace LazyCache
             = new Lazy<ICacheProvider>(() =>
                 new MemoryCacheProvider(
                     new MemoryCache(
-                        new MemoryCacheOptions())
+                        new MemoryCacheOptions() )
                 ));
 
         /// <summary>
@@ -183,6 +183,10 @@ namespace LazyCache
             return GetOrAddAsync(key, addItemFactory, null);
         }
 
+        public virtual void Compact(double percentage)
+        {
+            CacheProvider.Compact(percentage);
+        }
         public virtual async Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory,
             MemoryCacheEntryOptions policy)
         {
