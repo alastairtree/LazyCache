@@ -43,7 +43,7 @@ namespace LazyCache
             = new Lazy<ICacheProvider>(() =>
                 new MemoryCacheProvider(
                     new MemoryCache(
-                        new MemoryCacheOptions() )
+                        new MemoryCacheOptions())
                 ));
 
         /// <summary>
