@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
@@ -14,6 +16,8 @@ namespace LazyCache
 
         private readonly int[] keyLocks;
 
+        private ConcurrentDictionary<string, CachedItemMeta> cacheKeyDictionary;
+
         public CachingService() : this(DefaultCacheProvider)
         {
         }
@@ -23,6 +27,7 @@ namespace LazyCache
             this.cacheProvider = cacheProvider ?? throw new ArgumentNullException(nameof(cacheProvider));
             var lockCount = Math.Max(Environment.ProcessorCount * 8, 32);
             keyLocks = new int[lockCount];
+            cacheKeyDictionary = new ConcurrentDictionary<string, CachedItemMeta>();
         }
 
         public CachingService(Func<ICacheProvider> cacheProviderFactory)
@@ -31,7 +36,7 @@ namespace LazyCache
             cacheProvider = new Lazy<ICacheProvider>(cacheProviderFactory);
             var lockCount = Math.Max(Environment.ProcessorCount * 8, 32);
             keyLocks = new int[lockCount];
-
+            cacheKeyDictionary = new ConcurrentDictionary<string, CachedItemMeta>();
         }
 
         public CachingService(ICacheProvider cache) : this(() => cache)
@@ -68,6 +73,7 @@ namespace LazyCache
             ValidateKey(key);
 
             CacheProvider.Set(key, item, policy);
+            RememberCacheKey(key);
         }
 
         public virtual T Get<T>(string key)
@@ -112,6 +118,7 @@ namespace LazyCache
                     var result = addItemFactory(entry);
                     SetAbsoluteExpirationFromRelative(entry);
                     EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                    RememberCacheKey(entry.Key.ToString());
                     return result;
                 });
 
@@ -136,6 +143,7 @@ namespace LazyCache
                 if (valueHasChangedType)
                 {
                     CacheProvider.Remove(key);
+                    this.RemoveRememberedCacheKey(key);
 
                     // acquire lock again
                     hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
@@ -157,6 +165,7 @@ namespace LazyCache
             catch //addItemFactory errored so do not cache the exception
             {
                 CacheProvider.Remove(key);
+                this.RemoveRememberedCacheKey(key);
                 throw;
             }
         }
@@ -174,6 +183,7 @@ namespace LazyCache
         {
             ValidateKey(key);
             CacheProvider.Remove(key);
+            RemoveRememberedCacheKey(key);
         }
 
         public virtual ICacheProvider CacheProvider => cacheProvider.Value;
@@ -205,6 +215,7 @@ namespace LazyCache
                     var result = await addItemFactory(entry).ConfigureAwait(false);
                     SetAbsoluteExpirationFromRelative(entry);
                     EnsureEvictionCallbackDoesNotReturnTheAsyncOrLazy<T>(entry.PostEvictionCallbacks);
+                    RememberCacheKey(entry.Key.ToString());
                     return result;
                 });
 
@@ -225,6 +236,7 @@ namespace LazyCache
                 if (valueHasChangedType)
                 {
                     CacheProvider.Remove(key);
+                    this.RemoveRememberedCacheKey(key);
 
                     // acquire lock
                     hash = (uint)key.GetHashCode() % (uint)keyLocks.Length;
@@ -242,15 +254,24 @@ namespace LazyCache
                 }
 
                 if (result.IsCanceled || result.IsFaulted)
+                {
                     CacheProvider.Remove(key);
+                    this.RemoveRememberedCacheKey(key);
+                }
 
                 return await result.ConfigureAwait(false);
             }
             catch //addItemFactory errored so do not cache the exception
             {
                 CacheProvider.Remove(key);
+                this.RemoveRememberedCacheKey(key);
                 throw;
             }
+        }
+
+        public Dictionary<string, CachedItemMeta> GetCacheKeys()
+        {
+            return cacheKeyDictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         protected virtual T GetValueFromLazy<T>(object item, out bool valueHasChangedType)
@@ -339,6 +360,18 @@ namespace LazyCache
 
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentOutOfRangeException(nameof(key), "Cache keys cannot be empty or whitespace");
+        }
+
+        protected void RememberCacheKey(string key)
+        {
+            var meta = new CachedItemMeta();
+            cacheKeyDictionary.AddOrUpdate(key, meta, (oldKey, oldValue) => meta);
+        }
+
+        protected void RemoveRememberedCacheKey(string key)
+        {
+            CachedItemMeta remove;
+            cacheKeyDictionary.TryRemove(key, out remove);
         }
     }
 }

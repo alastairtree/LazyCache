@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -11,6 +12,7 @@ namespace LazyCache.Mocks
     public class MockCachingService : IAppCache
     {
         public ICacheProvider CacheProvider { get; } = new MockCacheProvider();
+        
         public CacheDefaults DefaultCachePolicy { get; set; } = new CacheDefaults();
 
         public T Get<T>(string key)
@@ -56,6 +58,11 @@ namespace LazyCache.Mocks
         {
             value = default(T);
             return true;
+        }
+
+        public Dictionary<string, CachedItemMeta> GetCacheKeys()
+        {
+            return new Dictionary<string, CachedItemMeta>();
         }
     }
 }

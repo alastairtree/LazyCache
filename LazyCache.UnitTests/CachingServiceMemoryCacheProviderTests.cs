@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -1168,6 +1169,94 @@ namespace LazyCache.UnitTests
             Assert.IsFalse(contains2);
 
             Assert.Throws<InvalidCastException>(() => sut.TryGetValue<int>(key, out var value3));
+        }
+
+        [Test]
+        public void ListOfCacheKeysContainsAllKeysAfterCallingAdd()
+        {
+            List<string> keys = new List<string>(){"one", "two", "three", "four", "five"};
+
+            
+            foreach (var key in keys)
+            {
+                sut.Add(key, key.Reverse());
+            }
+
+            var cachedKeys = sut.GetCacheKeys().Keys;
+
+            Assert.IsTrue(keys.Intersect(cachedKeys).Count() == keys.Count);
+        }
+
+        [Test]
+        public void ListOfCacheKeysContainsAllKeysAfterCallingGetOrAdd()
+        {
+            List<string> keys = new List<string>() { "one", "two", "three", "four", "five" };
+
+            foreach (var key in keys)
+            {
+                sut.GetOrAdd(key, () => key.Reverse());
+            }
+
+            var cachedKeys = sut.GetCacheKeys().Keys;
+
+            Assert.IsTrue(keys.Intersect(cachedKeys).Count() == keys.Count);
+        }
+
+        [Test]
+        public void ListOfCacheKeysContainsSomeKeysAfterCallingAddAndRemovingOne()
+        {
+            List<string> keys = new List<string>() { "one", "two", "three", "four", "five" };
+
+            foreach (var key in keys)
+            {
+                sut.Add(key, key.Reverse());
+            }
+
+            // remove three
+            sut.Remove("three");
+
+            var cachedKeys = sut.GetCacheKeys().Keys.ToList();
+
+            Assert.IsTrue(!cachedKeys.Contains("three"), "Three should be gone");
+        }
+
+        [Test]
+        public void ListOfCacheKeysContainsAllKeysAfterCallingGetOrAddAndRemovingOne()
+        {
+            List<string> keys = new List<string>() { "one", "two", "three", "four", "five" };
+
+            foreach (var key in keys)
+            {
+                sut.GetOrAdd(key, () => key.Reverse());
+            }
+
+            // remove three
+            sut.Remove("three");
+
+            var cachedKeys = sut.GetCacheKeys().Keys.ToList();
+
+            Assert.IsTrue(!cachedKeys.Contains("three"), "Three should be gone");
+        }
+
+        public void ListOfCacheKeysIsEmptyAfterRemovingThemAll()
+        {
+            List<string> keys = new List<string>() {"one", "two", "three", "four", "five"};
+
+            foreach (var key in keys)
+            {
+                sut.GetOrAdd(key, () => key.Reverse());
+            }
+
+            var cachedKeys = sut.GetCacheKeys().Keys.ToList();
+            Assert.IsTrue(keys.Intersect(cachedKeys).Count() == keys.Count);
+
+            foreach (var key in cachedKeys)
+            {
+                sut.Remove(key);
+            }
+
+            var cachedKeys2 = sut.GetCacheKeys().Keys.ToList();
+            Assert.AreEqual(cachedKeys2.Count, 0, "Should be zero keys left");
         }
     }
 }
