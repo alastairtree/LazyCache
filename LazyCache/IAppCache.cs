@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -12,6 +13,8 @@ namespace LazyCache
         ///     Define the number of seconds to cache objects for by default
         /// </summary>
         CacheDefaults DefaultCachePolicy { get; }
+        [Obsolete("This method has been deprecated. Use Set<T> instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void Add<T>(string key, T item, MemoryCacheEntryOptions policy);
         T Get<T>(string key);
         Task<T> GetAsync<T>(string key);
@@ -22,5 +25,6 @@ namespace LazyCache
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory);
         Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory, MemoryCacheEntryOptions policy);
         void Remove(string key);
+        void Set<T>(string key, T item, MemoryCacheEntryOptions policy);
     }
 }
