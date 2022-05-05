@@ -264,6 +264,15 @@ namespace LazyCache.UnitTests
         }
 
         [Test]
+        public void GetOrAddAndThenGetOrAddDifferentTypeSuppliesPolicy()
+        {
+	        sut.GetOrAdd(TestKey, cacheEntry => 123);
+	        sut.GetOrAdd(TestKey, cacheEntry => "itemWithDifferentType", new MemoryCacheEntryOptions { SlidingExpiration = new TimeSpan(750) });
+	        Thread.Sleep(1500);
+	        Assert.IsNull(sut.Get<string>(TestKey));
+        }
+
+        [Test]
         public void GetOrAddAndThenGetValueObjectReturnsCorrectType()
         {
             sut.GetOrAdd(TestKey, () => 123);
@@ -335,6 +344,15 @@ namespace LazyCache.UnitTests
             var second = await sut.GetOrAddAsync(TestKey, () => Task.FromResult(testObject));
             Assert.IsNotNull(second);
             Assert.IsInstanceOf<ComplexTestObject>(second);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncAndThenGetOrAddAsyncDifferentTypeSuppliesPolicy()
+        {
+	        await sut.GetOrAddAsync(TestKey, cacheEntry => Task.FromResult(new object()));
+	        await sut.GetOrAddAsync(TestKey, cacheEntry => Task.FromResult("itemWithDifferentType"), new MemoryCacheEntryOptions { SlidingExpiration = new TimeSpan(750) });
+	        await Task.Delay(1500);
+	        Assert.IsNull(sut.Get<string>(TestKey));
         }
 
         [Test]

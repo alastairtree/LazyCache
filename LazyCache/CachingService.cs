@@ -143,7 +143,7 @@ namespace LazyCache
 
                     try
                     {
-                        cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                        cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
                     }
                     finally
                     {
@@ -232,7 +232,7 @@ namespace LazyCache
 
                     try
                     {
-                        cacheItem = CacheProvider.GetOrCreate<object>(key, CacheFactory);
+                        cacheItem = CacheProvider.GetOrCreate<object>(key, policy, CacheFactory);
                     }
                     finally
                     {
