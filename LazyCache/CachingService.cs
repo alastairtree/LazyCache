@@ -92,17 +92,22 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            var isGetSuccess = CacheProvider.TryGetValue<Lazy<T>>(key, out var lazyItemFactory);
-
-            if (!isGetSuccess)
+            try
+            {
+                var item = CacheProvider.Get(key);
+                value = GetValueFromLazy<T>(item, out var valueHasChangedType);
+                if (valueHasChangedType)
+                {
+                    throw new InvalidCastException();
+                }
+            }
+            catch (Exception ex) when (!(ex is InvalidCastException))
             {
                 value = default(T);
-                return isGetSuccess;
+                return false;
             }
 
-            value = GetValueFromLazy<T>(lazyItemFactory, out _);
-
-            return isGetSuccess;
+            return value is T;
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
