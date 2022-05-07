@@ -1169,5 +1169,18 @@ namespace LazyCache.UnitTests
 
             Assert.Throws<InvalidCastException>(() => sut.TryGetValue<int>(key, out var value3));
         }
+
+        [Test]
+        public void TryGetReturnsCachedValueFromGetOrAdd()
+        {
+            sut.GetOrAdd(TestKey, () => testObject);
+            var isSuccess = sut.TryGetValue<ComplexTestObject>(TestKey, out var actual);
+            var expected = testObject;
+
+            Assert.IsTrue(isSuccess);
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual);
+        }
+
     }
 }
