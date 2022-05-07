@@ -92,7 +92,16 @@ namespace LazyCache
         {
             ValidateKey(key);
 
-            return CacheProvider.TryGetValue(key, out value);
+            try
+            {
+                var contains = CacheProvider.TryGetValue<Lazy<T>>(key, out var lazyFactory);
+                value = GetValueFromLazy<T>(lazyFactory, out var _);
+                return contains;
+            }
+            catch (InvalidCastException)
+            {
+                return CacheProvider.TryGetValue<T>(key, out value);
+            }
         }
 
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
