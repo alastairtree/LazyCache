@@ -10,6 +10,13 @@ namespace Microsoft.Extensions.DependencyInjection
     // See https://github.com/dotnet/runtime/blob/master/src/libraries/Microsoft.Extensions.Caching.Memory/src/MemoryCacheServiceCollectionExtensions.cs
     public static class LazyCacheServiceCollectionExtensions
     {
+        public static IServiceCollection AddLazyCache(this IServiceCollection services, Action<LazyCacheOptions> setupAction)
+        {
+            services.AddLazyCache();
+            services.Configure(setupAction);
+            return services;
+        }
+
         public static IServiceCollection AddLazyCache(this IServiceCollection services)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
@@ -18,13 +25,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAdd(ServiceDescriptor.Singleton<IMemoryCache, MemoryCache>());
             services.TryAdd(ServiceDescriptor.Singleton<ICacheProvider, MemoryCacheProvider>());
 
-            services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>(serviceProvider => 
-                new CachingService(
-                    new Lazy<ICacheProvider>(serviceProvider.GetRequiredService<ICacheProvider>))));
+            services.TryAdd(ServiceDescriptor.Singleton<IAppCache, CachingService>());
 
             return services;
         }
 
+        [Obsolete("use other signature for change options")]
         public static IServiceCollection AddLazyCache(this IServiceCollection services,
             Func<IServiceProvider, CachingService> implementationFactory)
         {

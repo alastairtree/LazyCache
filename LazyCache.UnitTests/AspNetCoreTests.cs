@@ -38,5 +38,21 @@ namespace LazyCache.UnitTests
             cache.Should().NotBeNull();
             result.Should().NotBeNull();
         }
+        
+        [Test]
+        public void CanResolveCacheFromServiceCollectionWithOptionsAsService()
+        {
+            var container = new ServiceCollection();
+            var cacheDurationSeconds = 12345;
+            container.AddLazyCache(options => options.DefaultCacheDurationSeconds = cacheDurationSeconds);
+            var provider = container.BuildServiceProvider();
+
+            var cache = provider.GetService<IAppCache>();
+            var result = cache?.GetOrAdd("key", () => new object());
+
+            cache.Should().NotBeNull();
+            cache.DefaultCachePolicy.DefaultCacheDurationSeconds.Should().Be(cacheDurationSeconds);
+            result.Should().NotBeNull();
+        }
     }
 }
