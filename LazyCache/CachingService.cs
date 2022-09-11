@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LazyCache
 {
@@ -13,6 +15,7 @@ namespace LazyCache
         private readonly Lazy<ICacheProvider> cacheProvider;
 
         private readonly int[] keyLocks;
+        private readonly LazyCacheOptions _options;
 
         public CachingService() : this(DefaultCacheProvider)
         {
@@ -34,6 +37,17 @@ namespace LazyCache
 
         }
 
+        [ActivatorUtilitiesConstructor]
+        public CachingService(ICacheProvider cacheProvider, IOptions<LazyCacheOptions> options)
+        {
+            if (cacheProvider == null) throw new ArgumentNullException(nameof(cacheProvider));
+            _options = options.Value;
+            this.cacheProvider = new Lazy<ICacheProvider>(() => cacheProvider);
+            keyLocks = new int[_options.NumberOfKeyLocks];
+            DefaultCachePolicy.DefaultCacheDurationSeconds = _options.DefaultCacheDurationSeconds;
+
+        }
+        
         public CachingService(ICacheProvider cache) : this(() => cache)
         {
             if (cache == null) throw new ArgumentNullException(nameof(cache));
