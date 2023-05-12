@@ -36,7 +36,7 @@ namespace LazyCache.UnitTestsCore22
         }
 
         [Test]
-        public async Task GetOrAddAsyncOnCore21DefaultCacheDurationHonoured()
+        public async Task GetOrAddAsyncOnCore22DefaultCacheDurationHonoured()
         {
             sut.DefaultCachePolicy.DefaultCacheDurationSeconds = 1;
 
@@ -60,7 +60,7 @@ namespace LazyCache.UnitTestsCore22
         }
 
         [Test]
-        public async Task GetOrAddOnCore21DefaultCacheDurationHonoured()
+        public async Task GetOrAddOnCore22DefaultCacheDurationHonoured()
         {
             sut.DefaultCachePolicy.DefaultCacheDurationSeconds = 1;
 
