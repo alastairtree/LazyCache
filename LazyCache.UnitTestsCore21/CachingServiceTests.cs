@@ -1,6 +1,8 @@
 ﻿using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using NUnit.Framework;
+using System.Threading.Tasks;
+using System;
 
 namespace LazyCache.UnitTestsCore21
 {
@@ -31,6 +33,54 @@ namespace LazyCache.UnitTestsCore21
 
             Assert.IsNotNull(cachedResult);
             Assert.AreEqual("SomeValue", cachedResult.SomeProperty);
+        }
+
+        [Test]
+        public async Task GetOrAddAsyncOnCore21DefaultCacheDurationHonoured()
+        {
+            sut.DefaultCachePolicy.DefaultCacheDurationSeconds = 1;
+
+            int value = DateTime.UtcNow.Second;
+            int result = await sut.GetOrAddAsync("foo", x => Task.FromResult(value));
+
+            Assert.AreEqual(value, result);
+
+            // wait for the item to expire
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            // same key
+            value = DateTime.UtcNow.Second;
+            result = await sut.GetOrAddAsync("foo", x => Task.FromResult(value));
+            Assert.AreEqual(value, result);
+
+            // new key
+            value = DateTime.UtcNow.Second;
+            result = await sut.GetOrAddAsync("bar", x => Task.FromResult(value));
+            Assert.AreEqual(value, result);
+        }
+
+        [Test]
+        public async Task GetOrAddOnCore21DefaultCacheDurationHonoured()
+        {
+            sut.DefaultCachePolicy.DefaultCacheDurationSeconds = 1;
+
+            int value = DateTime.UtcNow.Second;
+            int result = await sut.GetOrAdd("foo", x => Task.FromResult(value));
+
+            Assert.AreEqual(value, result);
+
+            // wait for the item to expire
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            // same key
+            value = DateTime.UtcNow.Second;
+            result = await sut.GetOrAdd("foo", x => Task.FromResult(value));
+            Assert.AreEqual(value, result);
+
+            // new key
+            value = DateTime.UtcNow.Second;
+            result = await sut.GetOrAdd("bar", x => Task.FromResult(value));
+            Assert.AreEqual(value, result);
         }
     }
 }
