@@ -13,5 +13,6 @@ namespace LazyCache
         void Remove(string key);
         Task<T> GetOrCreateAsync<T>(string key, Func<ICacheEntry, Task<T>> func);
         bool TryGetValue<T>(object key, out T value);
+        void Compact(double percentage);
     }
 }

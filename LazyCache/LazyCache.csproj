@@ -23,9 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\artwork\logo-128.png" Pack="true" PackagePath=""/>
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.1.0" />
+    <None Include="..\artwork\logo-128.png" Pack="true" PackagePath="" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

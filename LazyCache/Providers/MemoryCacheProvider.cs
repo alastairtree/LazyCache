@@ -88,5 +88,15 @@ namespace LazyCache.Providers
         {
             cache?.Dispose();
         }
+
+        public void Compact(double percentage)
+        {
+            if (cache is MemoryCache)
+            {
+                var c = cache as MemoryCache;
+                if (c != null)
+                    c.Compact(percentage);
+            }
+        }
     }
 }
