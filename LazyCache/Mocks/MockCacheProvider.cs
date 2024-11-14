@@ -43,5 +43,10 @@ namespace LazyCache.Mocks
         public void Dispose()
         {
         }
+
+        public void Compact(double percentage)
+        {
+            
+        }
     }
 }
