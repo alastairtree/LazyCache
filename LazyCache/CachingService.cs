@@ -297,7 +297,7 @@ namespace LazyCache
         /// </remarks>
         public virtual T GetOrAdd<T>(string key, Func<ICacheEntry, T> addItemFactory)
         {
-            return GetOrAdd(key, addItemFactory, null);
+            return GetOrAdd(key, addItemFactory, DefaultCachePolicy.BuildOptions());
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace LazyCache
         /// </remarks>
         public virtual Task<T> GetOrAddAsync<T>(string key, Func<ICacheEntry, Task<T>> addItemFactory)
         {
-            return GetOrAddAsync(key, addItemFactory, null);
+            return GetOrAddAsync(key, addItemFactory, DefaultCachePolicy.BuildOptions());
         }
 
         /// <summary>
