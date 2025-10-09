@@ -8,6 +8,10 @@
 ![Nuget](https://img.shields.io/nuget/dt/LazyCache.svg)
 
 
+
+**2025 update - [HybridCache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/hybrid?view=aspnetcore-9.0) is available and part of the framework now and solves most of the same problems as LazyCache. Consider using it in new projects and migrating old projects to use it as Microsft will likely provide better long term support**
+
+
 Lazy cache is a simple in-memory caching service. It has a developer friendly 
 generics based API, and provides a thread safe cache implementation that 
 guarantees to only execute your cachable delegates once (it's lazy!). Under 
@@ -91,5 +95,6 @@ If you have an idea or want to fix an issue please open an issue on Github to di
 If you have code to share you should submit a pull request: fork the repo, then create a branch on that repo with your changes, when you are happy create a pull Request from your branch into LazyCache master for review. See https://help.github.com/en/articles/creating-a-pull-request-from-a-fork. 
 
 LazyCache is narrow in focus and well established so unlikely to accept massive changes out of nowhere but come talk about on GitHub and we can all collaborate on something that works for everyone. It is also quite extensible so you may be able to extend it in your project or add a companion library if necessary.
+
 
 
